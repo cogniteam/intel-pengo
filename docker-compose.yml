@@ -1,0 +1,30 @@
+version: '3'
+services:
+  realsense1:
+    privileged: true
+    build: 
+      context: docker/realsense2
+      dockerfile: Dockerfile
+    network_mode: "host"
+    command: [ "cam1", "947122070333" ]
+  realsense2:
+    privileged: true
+    build: 
+      context: docker/realsense2
+      dockerfile: Dockerfile
+    network_mode: "host"
+    command: [ "cam2", "939622072996" ]
+  realsense3:
+    privileged: true
+    build: 
+      context: docker/realsense2
+      dockerfile: Dockerfile
+    network_mode: "host"
+    command: [ "cam3", "944622073450" ]
+  realsense4:
+    privileged: true
+    build: 
+      context: docker/realsense2
+      dockerfile: Dockerfile
+    network_mode: "host"
+    command: [ "cam4", "944622074845" ]
