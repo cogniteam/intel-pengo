@@ -8,21 +8,21 @@ SHELL [ "/bin/bash", "-c" ]
 #
 # Base apt dependencies
 #
-RUN apt update && apt install sudo cpio lsb-release wget -y
+RUN apt update && apt install sudo cpio lsb-release wget software-properties-common python3-yaml python3-requests -y
 
 #
 # Download OpenVINO 2018 R5
 #
 WORKDIR /
 RUN wget -c http://registrationcenter-download.intel.com/akdlm/irc_nas/15078/l_openvino_toolkit_p_2018.5.455.tgz
-RUN tar xzf -C /openvino_install l_openvino_toolkit_p_2018.5.455.tgz
-WORKDIR /openvino_install
+RUN mkdir /openvino_install
+RUN tar -xzf l_openvino_toolkit_p_2018.5.455.tgz && mv /l_openvino_toolkit_p_2018.5.455 /openvino_install
+WORKDIR /openvino_install/l_openvino_toolkit_p_2018.5.455
 
 #
 # OpenVINO install
 #
-RUN ./install_cv_sdk_dependencies.sh
-RUN ./install.sh --silent silent.cfg
+RUN ./install_cv_sdk_dependencies.sh && ./install.sh --silent silent.cfg
 
 #
 # Build samples
@@ -71,7 +71,6 @@ ENV LD_LIBRARY_PATH /opt/intel/computer_vision_sdk/deployment_tools/inference_en
 #
 # Intel realsense2 sdk
 #
-RUN apt-get install software-properties-common -y
 RUN apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
 RUN add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo `lsb_release -cs` main" -u -y
 RUN apt-get install librealsense2-dev ros-kinetic-realsense2-camera -y
@@ -91,7 +90,6 @@ RUN ln -s /root/catkin_ws/src/ros_openvino_toolkit /opt/openvino_toolkit/ros_ope
 #
 # Download trained models and install labels
 #
-RUN apt install python3-yaml python3-requests -y
 WORKDIR /opt/openvino_toolkit/open_model_zoo/model_downloader
 
 RUN python3 ./downloader.py --name mobilenet-ssd && \
