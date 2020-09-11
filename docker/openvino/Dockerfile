@@ -57,7 +57,8 @@ RUN mkdir /opencv_build/ && cd /opencv_build && \
 #
 # DLDT
 #
-COPY ./dldt /opt/openvino_toolkit/dldt
+WORKDIR /opt/openvino_toolkit
+RUN git clone https://github.com/opencv/dldt.git -b 2018_R4 --recurse-submodules
 WORKDIR /opt/openvino_toolkit/dldt/inference-engine
 RUN ./install_dependencies.sh
 WORKDIR /opt/openvino_toolkit/dldt/inference-engine/build
@@ -70,11 +71,6 @@ RUN . /opt/intel/computer_vision_sdk/bin/setupvars.sh && \
 COPY ./open_model_zoo /opt/openvino_toolkit/open_model_zoo
 WORKDIR /opt/openvino_toolkit/open_model_zoo/demos/build
 RUN source /opt/intel/computer_vision_sdk/bin/setupvars.sh && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8
-
-#
-# Other
-#
-# RUN pip3 install numpy networkx
 
 #
 # 
