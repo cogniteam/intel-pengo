@@ -14,7 +14,7 @@ RUN apt update && apt install sudo cpio lsb-release wget software-properties-com
 # Download OpenVINO 2018 R5
 #
 WORKDIR /
-RUN wget -c http://registrationcenter-download.intel.com/akdlm/irc_nas/15078/l_openvino_toolkit_p_2018.5.455.tgz
+RUN wget -nv -c https://cloud.cogni.io/index.php/s/hwIJbGZAnl0xXWP/download -O l_openvino_toolkit_p_2018.5.455.tgz
 RUN mkdir /openvino_install
 RUN tar -xzf l_openvino_toolkit_p_2018.5.455.tgz && mv /l_openvino_toolkit_p_2018.5.455 /openvino_install
 WORKDIR /openvino_install/l_openvino_toolkit_p_2018.5.455
