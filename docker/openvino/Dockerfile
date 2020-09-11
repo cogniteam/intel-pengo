@@ -37,6 +37,21 @@ RUN . /opt/intel/computer_vision_sdk/bin/setupvars.sh && \
 RUN echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/intel/computer_vision_sdk/deployment_tools/inference_engine/samples/build/intel64/Release/lib" >> /root/.bashrc
 RUN echo "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" >> /root/.bashrc
 
+#
+# OpenCV
+#
+WORKDIR /
+RUN mkdir /opencv_build/ && cd /opencv_build && \
+        apt-get install build-essential && \
+        apt-get install -y cmake git python3-numpy libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev && \
+        git clone https://github.com/opencv/opencv.git -b 3.4.2 --depth 1 && \
+        git clone https://github.com/opencv/opencv_contrib.git -b 3.4.2 --depth 1 && \
+        cd opencv && \
+        mkdir build && cd build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=/opencv_build/opencv_contrib/modules/ .. && \
+        make -j8 && \
+        sudo make install
+
 
 
 #
@@ -46,7 +61,8 @@ COPY ./dldt /opt/openvino_toolkit/dldt
 WORKDIR /opt/openvino_toolkit/dldt/inference-engine
 RUN ./install_dependencies.sh
 WORKDIR /opt/openvino_toolkit/dldt/inference-engine/build
-RUN cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8
+RUN . /opt/intel/computer_vision_sdk/bin/setupvars.sh && \
+        cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8
 
 #
 # Open Model Zoo
@@ -101,15 +117,54 @@ RUN python3 ./downloader.py --name mobilenet-ssd && \
         python3 downloader.py --name person-detection-retail-0013 && \
         python3 downloader.py --name person-reidentification-retail-0076
 
+
+#
+# Install python 3.6
+# 
+RUN add-apt-repository ppa:deadsnakes/ppa -y && \
+        apt-get update && \
+        apt-get install python3.6 -y
+
+#
+# Install PIP 3.6
+#
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3.6
+
+#
+# Install python dependencies for TF model optimizer
+#
+WORKDIR /opt/openvino_toolkit/dldt/model-optimizer
+RUN python3.6 -m pip install -r requirements.txt
+RUN python3.6 -m pip install networkx==1.11
+
+COPY ./mask_rcnn_inception_v2_coco_2018_01_28 /opt/models/mask_rcnn_inception_v2_coco_2018_01_28
+WORKDIR /opt/models/mask_rcnn_inception_v2_coco_2018_01_28
+
+#
+# Convert TF model to OpenVINO (?)
+#
+RUN python3.6 /opt/openvino_toolkit/dldt/model-optimizer/mo_tf.py --input_model frozen_inference_graph.pb --tensorflow_use_custom_operations_config /opt/openvino_toolkit/dldt/model-optimizer/extensions/front/tf/mask_rcnn_support.json --tensorflow_object_detection_api_pipeline_config pipeline.config --reverse_input_channels --output_dir ./output/
+
+#
+# Optimize model
+#
+WORKDIR /opt/openvino_toolkit/open_model_zoo/model_downloader
+
+# FP32 precision mode
+RUN python3.6 /opt/openvino_toolkit/dldt/model-optimizer/mo.py --input_model /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.caffemodel --output_dir /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP32 --mean_values [127.5,127.5,127.5] --scale_values [127.5]
+# FP16 precision mode
+RUN python3.6 /opt/openvino_toolkit/dldt/model-optimizer/mo.py --input_model /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.caffemodel --output_dir /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP16 --data_type=FP16 --mean_values [127.5,127.5,127.5] --scale_values [127.5]
+
+
+#
+# Copy labels
+#
 RUN cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/emotions-recognition/FP32/emotions-recognition-retail-0003.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/Retail/object_attributes/emotions_recognition/0003/dldt && \
         cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/face_detection/face-detection-adas-0001.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt && \
         cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_detection/mobilenet-ssd.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP32 && \
-        cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_detection/mobilenet-ssd.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP16
+        cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_detection/mobilenet-ssd.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP16 && \
+        cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_segmentation/frozen_inference_graph.labels /opt/models/mask_rcnn_inception_v2_coco_2018_01_28/output
 
-# WORKDIR /opt/openvino_toolkit/dldt/model-optimizer/install_prerequisites
-# RUN ./install_prerequisites.sh
-
-
-# WORKDIR /opt/openvino_toolkit/open_model_zoo/model_downloader
-# RUN python3 ./downloader.py --name mobilenet-ssd
-# RUN sudo python3 /opt/openvino_toolkit/dldt/model-optimizer/mo.py --input_model /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/mobilenet-ssd.caffemodel --output_dir /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP32 --mean_values [127.5,127.5,127.5] --scale_values [127.5]
+#
+# Ready !
+#
