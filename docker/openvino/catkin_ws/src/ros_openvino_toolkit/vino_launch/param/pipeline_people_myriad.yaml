@@ -22,18 +22,18 @@ Pipelines:
       engine: MYRIAD
       label: to/be/set/xxx.labels
       batch: 16
-  outputs: [ImageWindow, RosTopic,RViz]
+  outputs: [RosTopic,RViz]
   confidence_threshold: 0.2
   connects:
     - left: StandardCamera
       right: [FaceDetection]
     - left: FaceDetection
-      right: [AgeGenderRecognition, EmotionRecognition, HeadPoseEstimation, ImageWindow, RosTopic, RViz]
+      right: [AgeGenderRecognition, EmotionRecognition, HeadPoseEstimation, RosTopic, RViz]
     - left: AgeGenderRecognition
-      right: [ImageWindow, RosTopic,RViz]
+      right: [RosTopic,RViz]
     - left: EmotionRecognition
-      right: [ImageWindow, RosTopic,RViz]
+      right: [RosTopic,RViz]
     - left: HeadPoseEstimation
-      right: [ImageWindow, RosTopic,RViz]
+      right: [RosTopic,RViz]
 
 OpenvinoCommon:

@@ -105,6 +105,11 @@ RUN . /opt/ros/kinetic/setup.bash && \
 RUN ln -s /root/catkin_ws/src/ros_openvino_toolkit /opt/openvino_toolkit/ros_openvino_toolkit
 
 #
+# Add ROS workspace setup.bash source to .bashrc
+#
+RUN echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
+
+#
 # Download trained models and install labels
 #
 WORKDIR /opt/openvino_toolkit/open_model_zoo/model_downloader
@@ -164,6 +169,16 @@ RUN cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/emotions-recogniti
         cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_detection/mobilenet-ssd.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP32 && \
         cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_detection/mobilenet-ssd.labels /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP16 && \
         cp /opt/openvino_toolkit/ros_openvino_toolkit/data/labels/object_segmentation/frozen_inference_graph.labels /opt/models/mask_rcnn_inception_v2_coco_2018_01_28/output
+
+#
+# Install rviz
+#
+RUN apt-get install ros-kinetic-rviz -y
+
+#
+# Copy example video
+#
+COPY ./video.webm /root/
 
 #
 # Ready !
