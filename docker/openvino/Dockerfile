@@ -26,7 +26,7 @@ ENV LD_LIBRARY_PATH /opt/intel/computer_vision_sdk/deployment_tools/inference_en
 # Base apt dependencies
 #
 RUN apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE && \
-        apt update && apt install sudo cpio lsb-release wget software-properties-common ros-kinetic-rviz python3-yaml python3-requests -y && \
+        apt update && apt install build-essential cmake git python3-numpy libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev sudo cpio lsb-release wget software-properties-common ros-kinetic-rviz python3-yaml python3-requests -y && \
         add-apt-repository ppa:deadsnakes/ppa -y && \
         add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo `lsb_release -cs` main" -y && \
         apt update && \
@@ -42,26 +42,28 @@ RUN apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8
 #
 WORKDIR /
 RUN wget -nv -c https://cloud.cogni.io/index.php/s/hwIJbGZAnl0xXWP/download -O l_openvino_toolkit_p_2018.5.455.tgz && \
-        mkdir /openvino_install && \
-        tar -xzf l_openvino_toolkit_p_2018.5.455.tgz && mv /l_openvino_toolkit_p_2018.5.455 /openvino_install  && \
+        mkdir /openvino_install -p && \
+        tar -xzf l_openvino_toolkit_p_2018.5.455.tgz && \ 
+        rm /l_openvino_toolkit_p_2018.5.455/silent.cfg -rf && \
+        mv /l_openvino_toolkit_p_2018.5.455/* /openvino_install/l_openvino_toolkit_p_2018.5.455/ && \
+        rm /l_openvino_toolkit_p_2018.5.455 -rf && \
         cd /openvino_install/l_openvino_toolkit_p_2018.5.455 && \
         ./install_cv_sdk_dependencies.sh && ./install.sh --silent silent.cfg && \
         . /opt/intel/computer_vision_sdk/bin/setupvars.sh && \
         cd /opt/intel/computer_vision_sdk/deployment_tools/inference_engine/samples/ && \
-        mkdir build && cd build && \
+        mkdir build -p && cd build && \
         cmake .. && \
         make && \
         echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/intel/computer_vision_sdk/deployment_tools/inference_engine/samples/build/intel64/Release/lib" >> /root/.bashrc && \
         echo "source /opt/intel/computer_vision_sdk/bin/setupvars.sh" >> /root/.bashrc && \
-        rm /openvino_install -rf && rm /l_openvino_toolkit_p_2018.5.455.tgz -rf
+        rm /openvino_install -rf && rm /l_openvino_toolkit_p_2018.5.455.tgz -rf && \
+        rm /var/lib/apt/lists/* -rf
 
 #
 # OpenCV
 #
 WORKDIR /
 RUN mkdir /opencv_build/ && cd /opencv_build && \
-        apt-get install build-essential && \
-        apt-get install -y cmake git python3-numpy libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev && \
         git clone https://github.com/opencv/opencv.git -b 3.4.2 --depth 1 && \
         git clone https://github.com/opencv/opencv_contrib.git -b 3.4.2 --depth 1 && \
         cd opencv && \
@@ -80,22 +82,25 @@ WORKDIR /opt/openvino_toolkit
 RUN git clone https://github.com/opencv/dldt.git -b 2018_R4 --recurse-submodules && \
         cd /opt/openvino_toolkit/dldt/inference-engine && \
         ./install_dependencies.sh && \
+        mkdir build -p && \
         cd /opt/openvino_toolkit/dldt/inference-engine/build && \
         . /opt/intel/computer_vision_sdk/bin/setupvars.sh && \
         cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8 && \
+        mkdir /opt/openvino_toolkit/open_model_zoo/demos/build -p && \
         cd /opt/openvino_toolkit/open_model_zoo/demos/build && \
-        . /opt/intel/computer_vision_sdk/bin/setupvars.sh && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8
-
-#
-# Catkin make
-#
-WORKDIR /root/catkin_ws
-RUN . /opt/ros/kinetic/setup.bash && \
+        . /opt/intel/computer_vision_sdk/bin/setupvars.sh && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8 && \
+        #
+        # Catkin make
+        #
+        cd /root/catkin_ws && \
+        . /opt/ros/kinetic/setup.bash && \
         rosdep update && \
         rosdep install --from-path src --ignore-src -y && \
         catkin_make && \
         ln -s /root/catkin_ws/src/ros_openvino_toolkit /opt/openvino_toolkit/ros_openvino_toolkit && \
-        echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
+        echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc && \
+        rm /root/catkin_ws/build -rf && \
+        rm /var/lib/apt/lists/* -rf
 
 #
 # Download trained models and install labels
