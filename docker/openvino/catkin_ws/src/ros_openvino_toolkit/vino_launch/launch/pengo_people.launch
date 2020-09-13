@@ -1,0 +1,17 @@
+<launch>
+
+    <arg name="camera_name" default="camera" />
+    <arg name="myriad" default="false" />
+
+    <arg name="param_file"     if="$(arg myriad)" value="$(find vino_launch)/param/pengo_people_myriad.yaml" />
+    <arg name="param_file" unless="$(arg myriad)" value="$(find vino_launch)/param/pengo_people_cpu.yaml" />
+
+    <node pkg="dynamic_vino_sample" type="pipeline_with_params" name="pipeline_with_params" output="screen">
+        <param name="param_file" value="$(arg param_file)" />
+
+        <remap from="/camera/color/image_raw" to="$(arg camera_name)/color/image_raw" />
+        <remap from ="/openvino_toolkit/detected_objects" to = "/ros_openvino_toolkit/detected_objects" />
+        <remap from ="/openvino_toolkit/images" to = "/ros_openvino_toolkit/image_rviz" />
+    </node>
+
+</launch>

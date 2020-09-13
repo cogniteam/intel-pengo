@@ -12,7 +12,6 @@ ADD ./silent.cfg /openvino_install/l_openvino_toolkit_p_2018.5.455/
 COPY ./open_model_zoo /opt/openvino_toolkit/open_model_zoo
 COPY ./mask_rcnn_inception_v2_coco_2018_01_28 /opt/models/mask_rcnn_inception_v2_coco_2018_01_28
 COPY ./video.webm /root/
-COPY ./catkin_ws /root/catkin_ws
 
 #
 # 
@@ -78,6 +77,7 @@ RUN mkdir /opencv_build/ && cd /opencv_build && \
 #
 # DLDT & Open Model Zoo
 #
+COPY ./catkin_ws /root/catkin_ws
 WORKDIR /opt/openvino_toolkit
 RUN git clone https://github.com/opencv/dldt.git -b 2018_R4 --recurse-submodules && \
         cd /opt/openvino_toolkit/dldt/inference-engine && \

@@ -1,0 +1,7 @@
+
+NUC 4 Cameras:
+
+docker run --privileged --network=host --rm -it pengo/realsense2 cam1 947122070333 0 1 0 0 0 0
+docker run --privileged --network=host --rm -it pengo/realsense2 cam2 939622072996 0 2 0 0 0 0
+docker run --privileged --network=host --rm -it pengo/realsense2 cam3 944622073450 0 3 0 0 0 0
+docker run --privileged --network=host --rm -it pengo/realsense2 cam4 944622074845 0 4 0 0 0 0

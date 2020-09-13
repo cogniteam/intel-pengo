@@ -1,0 +1,18 @@
+Pipelines:
+  - name: object
+    inputs: [RealSenseCameraTopic]
+    infers: # CPU supports only FP32
+      - name: ObjectDetection
+        model: /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/mobilenet-ssd/caffe/output/FP32/mobilenet-ssd.xml
+        engine: CPU
+        label: to/be/set/xxx.labels
+        batch: 1
+    outputs: [RosTopic, RViz]
+    confidence_threshold: 0.5
+    connects:
+      - left: RealSenseCameraTopic
+        right: [ObjectDetection]
+      - left: ObjectDetection
+        right: [RosTopic]
+      - left: ObjectDetection
+        right: [RViz]
