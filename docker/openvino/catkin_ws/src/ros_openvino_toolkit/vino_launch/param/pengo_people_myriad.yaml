@@ -35,5 +35,3 @@ Pipelines:
       right: [RosTopic,RViz]
     - left: HeadPoseEstimation
       right: [RosTopic,RViz]
-
-OpenvinoCommon:
