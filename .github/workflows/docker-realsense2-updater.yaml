@@ -11,4 +11,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build RealSense2 firmware updater Docker image
-      run: docker build . --file Dockerfile --tag intelpengo/realsense2-updater
+      run: docker build docker/realsense2-updater/ --tag intelpengo/realsense2-updater
