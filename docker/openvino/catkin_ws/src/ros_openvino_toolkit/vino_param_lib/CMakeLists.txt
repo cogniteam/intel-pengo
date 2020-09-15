@@ -90,8 +90,8 @@ if(UNIX OR APPLE)
 
   # Add x86 intrinsic compiler support
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mf16c")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mf16c")
+  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
 
 # Install

@@ -8,3 +8,8 @@ docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it inte
 docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam3 944622073450 0 3 0 0 0 0
 
 docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam4 944622074845 0 4 0 0 0 0
+
+
+
+docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -v /dev:/dev -it intelpengo/openvino
+
