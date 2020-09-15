@@ -2,29 +2,25 @@ version: '3'
 services:
   realsense1:
     privileged: true
-    build: 
-      context: docker/realsense2
-      dockerfile: Dockerfile
+    image: intelpengo/realsense2
     network_mode: "host"
     command: [ "cam1", "947122070333" ]
+    restart: always
   realsense2:
     privileged: true
-    build: 
-      context: docker/realsense2
-      dockerfile: Dockerfile
+    image: intelpengo/realsense2
     network_mode: "host"
     command: [ "cam2", "939622072996" ]
+    restart: always
   realsense3:
     privileged: true
-    build: 
-      context: docker/realsense2
-      dockerfile: Dockerfile
+    image: intelpengo/realsense2
     network_mode: "host"
     command: [ "cam3", "944622073450" ]
+    restart: always
   realsense4:
     privileged: true
-    build: 
-      context: docker/realsense2
-      dockerfile: Dockerfile
+    image: intelpengo/realsense2
     network_mode: "host"
     command: [ "cam4", "944622074845" ]
+    restart: always

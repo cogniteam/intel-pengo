@@ -5,7 +5,7 @@ set -e
 . /opt/ros/$ROS_DISTRO/setup.bash
 
 CAMERA_NAME="${1:-camera}"
-SERIAL_NO="${2:-944622074845}"
+SERIAL_NO="${2}"
 
 X=${3:-0}
 Y=${4:-0}

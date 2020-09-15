@@ -1,0 +1,14 @@
+name: docker-build:realsense2-updater
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build RealSense2 firmware updater Docker image
+      run: docker build . --file Dockerfile --tag intelpengo/realsense2-updater
