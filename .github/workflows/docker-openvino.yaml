@@ -5,7 +5,7 @@ on:
     branches: master
 
 jobs:
-  path-context:
+  build-n-push-openvino:
     runs-on: ubuntu-latest
     steps:
       -
@@ -23,6 +23,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.8
+        continue-on-error: true
       -
         name: Build and push
         uses: docker/build-push-action@v2
