@@ -4,7 +4,7 @@
 
     <arg name="param_file" value="$(find vino_launch)/param/pengo_segmentation.yaml" />
 
-    <node pkg="dynamic_vino_sample" type="pipeline_with_params" name="pipeline_with_params" output="screen">
+    <node pkg="dynamic_vino_sample" type="pipeline_with_params" name="pipeline_with_params_$(arg camera_name)" output="screen">
         <param name="param_file" value="$(arg param_file)" />
 
         <remap from="/camera/color/image_raw" to="$(arg camera_name)/color/image_raw" />

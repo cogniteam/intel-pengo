@@ -14,6 +14,6 @@ YAW=${6:-0}
 PITCH=${7:-0}
 ROLL=${8:-0}
 
-rosrun tf2_ros static_transform_publisher X Y Z YAW PITCH ROLL base_link ${CAMERA_NAME}_link &
+rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link ${CAMERA_NAME}_link &
 
 roslaunch realsense2_camera rs_camera.launch enable_pointcloud:=true camera:=${CAMERA_NAME} serial_no:=${SERIAL_NO}
