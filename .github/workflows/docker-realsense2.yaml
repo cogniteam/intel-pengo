@@ -23,6 +23,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - 
+        name: Cache docker 
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-docker-lib-realsense2
+        with:
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          path: /var/lib/docker/
       -
         name: Build and push realsense2
         uses: docker/build-push-action@v2
