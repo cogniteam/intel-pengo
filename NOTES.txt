@@ -1,15 +1,24 @@
 
 NUC 4 Cameras:
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam1 947122070333 0 0 0 0 0 0
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam1 939622072996 0 0 0 0 0 0
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam2 939622072996 0 0 0 -1.570796326 0 0
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam2 947122070333 0 0 0 -4.7123889803 0 0
 
 docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam3 944622073450 0 0 0 -3.14159265 0 0
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam4 944622074845 0 0 0 -4.7123889803 0 0
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam4 944622074845 0 0 0 -1.570796326 0 0
+
+docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -v /dev:/dev -it intelpengo/openvino bash -ic "roslaunch vino_launch pengo_detection.launch myriad:=true camera_name:=cam1"
+
+TURTLEBOT_SERIAL_PORT=/dev/ttyUSB1 roslaunch turtlebot_bringup minimal.launch
 
 
 
-docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -v /dev:/dev -it intelpengo/openvino
-
+#
+# Remote 
+#
+sudo apt install xfce4 xfce4-goodies 
+sudo apt install tightvncserver
+vnc4server
+sudo ufw allow from any to any port 5901 proto tcp

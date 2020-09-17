@@ -41,3 +41,12 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: intelpengo/realsense2-updater
+      -
+        name: Build and push realsense2-t265
+        uses: docker/build-push-action@v2
+        with:
+          context: docker/realsense2-t265/
+          file: docker/realsense2-t265/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: intelpengo/realsense2-t265
