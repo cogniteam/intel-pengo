@@ -1,6 +1,6 @@
 
-![Docker Image CI](https://github.com/blackpc/pengo-docker/workflows/Docker%20Image%20CI/badge.svg)
-
+![docker-build:openvino](https://github.com/blackpc/pengo-docker/workflows/docker-build:openvino/badge.svg) 
+![docker-build:realsense2](https://github.com/blackpc/pengo-docker/workflows/docker-build:realsense2/badge.svg) ![docker-build:realsense2-updater](https://github.com/blackpc/pengo-docker/workflows/docker-build:realsense2-updater/badge.svg)
 
 ### OpenVINO docker image
 
