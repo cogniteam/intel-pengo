@@ -1,24 +1,86 @@
 
-NUC 4 Cameras:
+# Pengo platform
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam1 939622072996 0 0 0 0 0 0
+## Realsense cameras:
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam2 947122070333 0 0 0 -4.7123889803 0 0
+Front D435 camera:
+```
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam1 939622072996 0.17 0 0.27 0 0 0
+```
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam3 944622073450 0 0 0 -3.14159265 0 0
+Left D435 camera:
+```
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam2 947122070333 0 0.17 0.27 -4.7123889803 0 0
+```
 
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam4 944622074845 0 0 0 -1.570796326 0 0
+Rear D435 camera:
+```
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam3 944622073450 -0.17 0 0.27 -3.14159265 0 0
+```
 
+Right D435 camera:
+```
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2 cam4 944622074845 0 -0.17 0.27 -1.570796326 0 0
+```
+
+Front T265 camera:
+```
+docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2-t265 cam4 944622074845 0 0 0.27 -1.570796326 0 0
+```
+
+## OpenVINO Detection
+
+ROS OpenVINo MobileNet SSD detection on Myriad:
+```
 docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -v /dev:/dev -it intelpengo/openvino bash -ic "roslaunch vino_launch pengo_detection.launch myriad:=true camera_name:=cam1"
+```
 
+## Kobuki driver
+Turtlebot driver:
+```
+sudo apt install ros-kinetic-turtlebot-bringup
 TURTLEBOT_SERIAL_PORT=/dev/ttyUSB1 roslaunch turtlebot_bringup minimal.launch
+```
 
 
 
-#
-# Remote 
-#
-sudo apt install xfce4 xfce4-goodies 
-sudo apt install tightvncserver
-vnc4server
+## VNC setup on pengo
+
+Install dependencies:
+```
+sudo apt update
+sudo apt install tightvncserver ubuntu-desktop gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal -y
+vnc4server # enter password
 sudo ufw allow from any to any port 5901 proto tcp
+```
+
+Edit `~/.vnc/xstartup`:
+```
+#!/bin/sh
+
+# Uncomment the following two lines for normal desktop:
+# unset SESSION_MANAGER
+# exec /etc/X11/xinit/xinitrc
+
+#[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+#[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+#xsetroot -solid grey
+#vncconfig -iconic &
+#x-terminal-emulator -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+#x-window-manager &
+
+export XKL_XMODMAP_DISABLE=1
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+xsetroot -solid grey
+vncconfig -iconic &
+gnome-session &
+gnome-panel &
+gnome-settings-daemon &
+metacity &
+nautilus &
+gnome-terminal &
+```
