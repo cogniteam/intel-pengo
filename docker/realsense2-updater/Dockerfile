@@ -9,7 +9,10 @@ WORKDIR /
 RUN wget https://www.intelrealsense.com/wp-content/uploads/2020/08/D400_Series_Production_FW_5_12_7_100.zip && \
         unzip D400_Series_Production_FW_5_12_7_100.zip
 
-CMD rs-fw-update -f Signed_Image_UVC_5_12_7_100.bin
-        
+#CMD rs-fw-update -f Signed_Image_UVC_5_12_7_100.bin
+
+COPY ./entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]       
 
 
