@@ -1,4 +1,4 @@
-name: docker-build:kobuki-driver
+name: docker-build:rplidar
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - develop
 
 jobs:
-  build-n-push-kobuki-driver:
+  build-n-push-rplidar:
     runs-on: ubuntu-latest
     steps:
       -
@@ -29,8 +29,8 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: docker/kobuki-driver/
-          file: docker/kobuki-driver/Dockerfile
+          context: docker/rplidar/
+          file: docker/rplidar/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: intelpengo/kobuki-driver
+          tags: intelpengo/rplidar
