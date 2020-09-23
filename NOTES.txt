@@ -39,11 +39,14 @@ docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -v /dev:/dev -it 
 ```
 
 ## Kobuki driver
-Turtlebot driver:
 ```
 docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -it intelpengo/kobuki-driver:latest /dev/ttyUSB1
 ```
 
+## RPlidar driver
+```
+docker run --privileged --network=host -it intelpengo/rplidar:latest rosrun rplidar_ros rplidarNode _serial_port:=/dev/ttyUSB0
+```
 
 
 ## VNC setup on pengo
