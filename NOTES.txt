@@ -25,7 +25,10 @@ docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it inte
 
 Front T265 camera:
 ```
-docker run -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2-t265 cam4 944622074845 0 0 0.27 -1.570796326 0 0
+docker run -v /dev:/dev -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2-t265 cam5 11622110757 0 0 0.27 -1.570796326 0 0
+```
+```
+docker run -v /dev:/dev -e ROS_MASTER_URI -e ROS_IP --privileged --network=host --rm -it intelpengo/realsense2-t265 cam1 11622110838 0 0 0.27 -1.570796326 0 0
 ```
 
 ## OpenVINO Detection
@@ -38,49 +41,43 @@ docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -v /dev:/dev -it 
 ## Kobuki driver
 Turtlebot driver:
 ```
-sudo apt install ros-kinetic-turtlebot-bringup
-TURTLEBOT_SERIAL_PORT=/dev/ttyUSB1 roslaunch turtlebot_bringup minimal.launch
+docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -it intelpengo/kobuki-driver:latest /dev/ttyUSB1
 ```
 
 
 
 ## VNC setup on pengo
 
-Install dependencies:
+Install tigervnc and xfce4 desktop:
 ```
 sudo apt update
-sudo apt install tightvncserver ubuntu-desktop gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal -y
+sudo apt install xfce4 xfce4-goodies tigervnc-standalone-server -t
+
+# Ubuntu 16.04 Only 
+# Install tigervnc using tar
+# Download https://bintray.com/tigervnc/stable/download_file?file_path=tigervnc-1.11.0.x86_64.tar.gz
+# Unpack contents to /
+
 vnc4server # enter password
 sudo ufw allow from any to any port 5901 proto tcp
 ```
 
-Edit `~/.vnc/xstartup`:
+Edit `~/.vnc/config`:
 ```
-#!/bin/sh
+geometry=1920x1080
+dpi=96
+session=xfce
+alwaysshared
+```
 
-# Uncomment the following two lines for normal desktop:
-# unset SESSION_MANAGER
-# exec /etc/X11/xinit/xinitrc
+Edit `/etc/tigervnc/vncserver.users` and map display to user:
+```
+:1=hamster
+```
 
-#[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
-#[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
-#xsetroot -solid grey
-#vncconfig -iconic &
-#x-terminal-emulator -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
-#x-window-manager &
-
-export XKL_XMODMAP_DISABLE=1
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
-
-[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
-[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
-xsetroot -solid grey
-vncconfig -iconic &
-gnome-session &
-gnome-panel &
-gnome-settings-daemon &
-metacity &
-nautilus &
-gnome-terminal &
+Enable and run systemd service:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable vncserver@:1.service
+sudo systemctl start vncserver@:1.service
 ```
