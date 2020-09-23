@@ -45,7 +45,12 @@ docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -it intelpengo/ko
 
 ## RPlidar driver
 ```
-docker run --privileged --network=host -it intelpengo/rplidar:latest rosrun rplidar_ros rplidarNode _serial_port:=/dev/ttyUSB0
+docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged -it intelpengo/rplidar:latest rosrun rplidar_ros rplidarNode _serial_port:=/dev/ttyUSB0
+```
+
+## Navigation 
+```
+docker run -e ROS_MASTER_URI -e ROS_IP --net=host --network=host -it intelpengo/kobuki-navigation:latest
 ```
 
 

@@ -4,21 +4,37 @@
   Selector for the base.
  -->
  <launch>
+
+    <arg name="base" default="kobuki" />
+    <arg name="stacks" default="hexagons" />
+    <arg name="3d_sensor" default="r200" />
+    <arg name="serialport" default="/dev/ttyUSB0" />
+
+    <arg name="urdf_file" default="$(find xacro)/xacro '$(find turtlebot_description)/robots/$(arg base)_$(arg stacks)_$(arg 3d_sensor).urdf.xacro'"/>
+    <param name="robot_description" command="$(arg urdf_file)"/>
+
+
     <!-- mobile base nodelet manager -->
     <node pkg="nodelet" type="nodelet" name="mobile_base_nodelet_manager" args="manager"/>
   
     <!-- mobile base -->
-    <arg name="base"/>
-    <arg name="serialport"/>
     <include file="$(find kobuki_launch)/launch/includes/mobile_base.launch.xml">
-      <arg name="serialport" value="$(arg serialport)"/>
-      <arg name="manager" value="mobile_base_nodelet_manager"/>
+        <arg name="serialport" value="$(arg serialport)"/>
+        <arg name="manager" value="mobile_base_nodelet_manager"/>
     </include>
   
     <!-- velocity commands multiplexer -->
     <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
-      <param name="yaml_cfg_file" value="$(find kobuki_launch)/param/mux.yaml"/>
-      <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
+        <param name="yaml_cfg_file" value="$(find kobuki_launch)/param/mux.yaml"/>
+        <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
+    </node>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="20.0" />
+    </node>
+
+    <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
+        <rosparam command="load" file="$(find kobuki_launch)/param/diagnostics.yaml" />
     </node>
   
   </launch>
