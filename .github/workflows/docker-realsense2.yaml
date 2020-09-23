@@ -2,7 +2,9 @@ name: docker-build:realsense2
 
 on:
   push:
-    branches: master,develop
+    branches: 
+      - master
+      - develop
 
 jobs:
   build-n-push-realsense2:
