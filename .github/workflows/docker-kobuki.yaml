@@ -7,7 +7,7 @@ on:
       - develop
 
 jobs:
-  build-n-push-kobuki-driver:
+  build-n-push-kobuki:
     runs-on: ubuntu-latest
     steps:
       -
