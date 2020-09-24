@@ -25,7 +25,7 @@ docker run -e ROS_MASTER_URI -e ROS_IP --privileged --net=host --rm -it intelpen
 
 Front T265 camera:
 ```
-docker run -v /dev:/dev -e ROS_MASTER_URI -e ROS_IP --privileged --net=host --rm -it intelpengo/realsense2-t265 cam5 11622110757 0 0 0.27 -1.570796326 0 0
+docker run -v /dev:/dev -e ROS_MASTER_URI -e ROS_IP --privileged --net=host --rm -it intelpengo/realsense2-t265 cam5 11622110757 0.17 0 0.27 0 0 0
 ```
 
 Other serials:
@@ -40,7 +40,7 @@ docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged --rm -v /dev:/dev
 
 ## Kobuki driver
 ```
-docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged --rm -it intelpengo/kobuki-driver:latest /dev/ttyUSB1
+docker run -e ROS_MASTER_URI -e ROS_IP --net=host --privileged --rm -it intelpengo/kobuki-driver:latest /dev/ttyUSB0
 ```
 
 ## RPlidar driver

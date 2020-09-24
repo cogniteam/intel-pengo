@@ -15,5 +15,6 @@ PITCH=${7:-0}
 ROLL=${8:-0}
 
 rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link ${CAMERA_NAME}_link &
+rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} odom ${CAMERA_NAME}_odom_frame &
 
-roslaunch realsense2_camera rs_t265.launch enable_pointcloud:=true camera:=${CAMERA_NAME} serial_no:=${SERIAL_NO}
+roslaunch realsense2_camera rs_t265.launch enable_fisheye1:=true enable_fisheye2:=true camera:=${CAMERA_NAME} serial_no:=${SERIAL_NO} publish_odom_tf:=false
