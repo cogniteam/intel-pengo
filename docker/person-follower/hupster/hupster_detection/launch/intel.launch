@@ -1,0 +1,20 @@
+<launch>
+    
+    <arg name="camera_name" default="cam1" />
+
+    <!--  
+        Object pose estimation
+    -->
+    <node name="hupster_object_pose_estimation_node" pkg="hupster_detection" 
+          type="hupster_object_pose_estimation_node" respawn="true" >
+        <remap from="/camera/aligned_depth_to_color/image_raw" to="/$(arg camera_name)/aligned_depth_to_color/image_raw" />
+        <remap from="/camera/color/camera_info" to="/$(arg camera_name)/color/camera_info" />
+    </node>
+
+    <node name="hupster_object_pose_filter_node" pkg="hupster_detection"
+          type="hupster_object_pose_filter_node">
+        <param name="target" value="chair"/>
+        <param name="odom_frame" value="odom"/>
+    </node>
+
+</launch>
