@@ -51,7 +51,5 @@ obstacle_layer:
 
 #cost_scaling_factor and inflation_radius were now moved to the inflation_layer ns
 
-static_layer:
-  enabled:              true
   
 
