@@ -56,15 +56,15 @@ private:
     }
 
     void timerCallback (const ros::TimerEvent&) {
-        if (state_ != "tracking") {
-            return;
-        }
+        // if (state_ != "tracking") {
+        //     return;
+        // }
 
         auto currentTime = ros::Time::now();
         if ((currentTime - lastObjectTimeUpdate_).toSec() > timeout_) {
             geometry_msgs::PoseStamped sPose;
             sPose.header.frame_id = "base_link";
-            sPose.header.stamp = ros::Time::now();
+            sPose.header.stamp = ros::Time(0);
             sPose.pose.orientation.x = 0;
             sPose.pose.orientation.y = 0;
             sPose.pose.orientation.z = 0;
@@ -79,6 +79,9 @@ private:
             setState("lost");
             return;
         }
+
+        lastGoal_.pose.orientation = calculateYaw(lastGoal_);
+
         targetPub_.publish(lastGoal_);
     }
 
@@ -87,7 +90,7 @@ private:
         for (auto m : msg->markers) {
             if(m.text == target_)
             {
-                tfListener_.waitForTransform(
+                tfListenerGoalPose_.waitForTransform(
                     odomFrame_, m.header.frame_id, m.header.stamp, ros::Duration(10));
 
                 geometry_msgs::PoseStamped sPose;
@@ -96,7 +99,7 @@ private:
                 sPose.header = m.header;
                 sPose.pose = m.pose;
 
-                tfListener_.transformPose(odomFrame_, sPose, sPoseConv);
+                tfListenerGoalPose_.transformPose(odomFrame_, sPose, sPoseConv);
                 sPoseConv.pose.position.z = 0;
                 sPoseConv.pose.orientation.x = 0;
                 sPoseConv.pose.orientation.y = 0;
@@ -104,10 +107,32 @@ private:
                 sPoseConv.pose.orientation.w = 1;
 
                 lastGoal_ = sPoseConv;
+                
+                if (state_ != "tracking") {
+                    targetPub_.publish(lastGoal_);
+                }
+
                 setState("tracking");
+
+                
                 lastObjectTimeUpdate_ = ros::Time::now();
             } 
         }
+    }
+
+    geometry_msgs::Quaternion calculateYaw(geometry_msgs::PoseStamped goalPose) {
+
+        tfListenerRobotPose_.waitForTransform(
+            odomFrame_, "base_link", ros::Time(0), ros::Duration(10));
+
+        tf::StampedTransform tfStamped;
+
+        tfListenerRobotPose_.lookupTransform(odomFrame_, "base_link", ros::Time(0), tfStamped);
+
+        double deltaX = goalPose.pose.position.x - tfStamped.getOrigin().getX();
+        double deltaY = goalPose.pose.position.y - tfStamped.getOrigin().getY();
+
+        return tf::createQuaternionMsgFromYaw(atan2(deltaY,deltaX));
     }
 
 private:
@@ -124,7 +149,9 @@ private:
 
     double timeout_;;
 
-    tf::TransformListener tfListener_;
+    tf::TransformListener tfListenerGoalPose_;
+
+    tf::TransformListener tfListenerRobotPose_;
 
     ros::Time lastObjectTimeUpdate_;
 

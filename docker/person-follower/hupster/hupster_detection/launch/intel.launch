@@ -15,8 +15,8 @@
           type="person_follower_node">
         <param name="target" value="person"/>
         <param name="odom_frame" value="odom"/>
-        <param name="timeout" value="30.0"/>
-        <param name="rate" value="2.0"/>
+        <param name="timeout" value="3.0"/>
+        <param name="rate" value="1.0"/>
         <remap from="person_follower/target" to="move_base_simple/goal"/>
     </node>
 
