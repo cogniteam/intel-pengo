@@ -31,7 +31,7 @@ jobs:
         with:
           context: docker/realsense2/
           file: docker/realsense2/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64
           push: true
           tags: intelpengo/realsense2
       -
@@ -49,6 +49,6 @@ jobs:
         with:
           context: docker/realsense2-t265/
           file: docker/realsense2-t265/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64
           push: true
           tags: intelpengo/realsense2-t265
