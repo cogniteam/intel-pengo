@@ -41,16 +41,16 @@ target_link_libraries(hupster_object_pose_estimation_node
   ${OpenCV_LIBRARIES}
 )
 
-add_executable(hupster_object_pose_filter_node 
-    src/target_filter_node.cpp
+add_executable(person_follower_node 
+    src/person_follower_node.cpp
 )
 
-add_dependencies(hupster_object_pose_filter_node
+add_dependencies(person_follower_node
     ${${PROJECT_NAME}_EXPORTED_TARGETS} 
     ${catkin_EXPORTED_TARGETS}
 )
 
-target_link_libraries(hupster_object_pose_filter_node
+target_link_libraries(person_follower_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )

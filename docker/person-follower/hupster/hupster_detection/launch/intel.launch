@@ -12,9 +12,12 @@
     </node>
 
     <node name="hupster_object_pose_filter_node" pkg="hupster_detection"
-          type="hupster_object_pose_filter_node">
-        <param name="target" value="chair"/>
+          type="person_follower_node">
+        <param name="target" value="person"/>
         <param name="odom_frame" value="odom"/>
+        <param name="timeout" value="30.0"/>
+        <param name="rate" value="2.0"/>
+        <remap from="person_follower/target" to="move_base_simple/goal"/>
     </node>
 
 </launch>
