@@ -1,6 +1,7 @@
 <launch>
     
     <arg name="camera_name" default="cam1" />
+    <arg name="tracking_target" default="person" />
 
     <!--  
         Object pose estimation
@@ -13,7 +14,7 @@
 
     <node name="hupster_object_pose_filter_node" pkg="hupster_detection"
           type="person_follower_node">
-        <param name="target" value="person"/>
+        <param name="target" value="$(arg tracking_target)"/>
         <param name="odom_frame" value="odom"/>
         <param name="timeout" value="3.0"/>
         <param name="rate" value="1.0"/>
