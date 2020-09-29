@@ -127,6 +127,7 @@ RUN python3.6 -m pip install -r requirements.txt && \
         # Convert TF model to OpenVINO (?)
         #
         python3.6 /opt/openvino_toolkit/dldt/model-optimizer/mo_tf.py --input_model frozen_inference_graph.pb --tensorflow_use_custom_operations_config /opt/openvino_toolkit/dldt/model-optimizer/extensions/front/tf/mask_rcnn_support.json --tensorflow_object_detection_api_pipeline_config pipeline.config --reverse_input_channels --output_dir ./output/ && \
+        python3.6 /opt/openvino_toolkit/dldt/model-optimizer/mo_tf.py --input_model frozen_inference_graph.pb --tensorflow_use_custom_operations_config /opt/openvino_toolkit/dldt/model-optimizer/extensions/front/tf/mask_rcnn_support.json --tensorflow_object_detection_api_pipeline_config pipeline.config --data_type=FP16 --reverse_input_channels --output_dir ./output_fp16/ && \
         #
         # Optimize model
         #
