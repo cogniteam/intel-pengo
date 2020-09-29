@@ -95,6 +95,12 @@ private:
 
     void detectedObjectsCallback(const object_msgs::ObjectsInBoxes::Ptr& objects) {
 
+        static int i = 10;
+
+        if (i-- > 0) 
+            return; 
+
+
         if (!cameraModel_.initialized() || depthImage_.cols == 0 || depthImage_.rows == 0) {
             return;
         }

@@ -53,16 +53,22 @@
   <build_depend>roscpp</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>depth_image_proc</build_depend>
+  <build_depend>angles</build_depend>
+  <build_depend>ackermann_msgs</build_depend>
 
   <build_export_depend>object_msgs</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>tf</build_export_depend>
   <build_export_depend>depth_image_proc</build_export_depend>
+  <build_export_depend>angles</build_export_depend>
+  <build_export_depend>ackermann_msgs</build_export_depend>
   
   <exec_depend>object_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>depth_image_proc</exec_depend>
+  <exec_depend>angles</exec_depend>
+  <exec_depend>ackermann_msgs</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

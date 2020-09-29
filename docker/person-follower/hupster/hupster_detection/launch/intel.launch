@@ -21,7 +21,7 @@
         <remap from="person_follower/target" to="move_base_simple/goal"/> -->
 
         <param name="target" value="$(arg tracking_target)"/>
-        <param name="min_distance" value="1.0" />
+        <param name="min_distance" value="1.5" />
         <param name="max_distance" value="3.0" />
         <param name="max_speed" value="0.8" />
         <param name="min_speed" value="0.2" />
