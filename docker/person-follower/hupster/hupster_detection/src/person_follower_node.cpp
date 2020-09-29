@@ -67,6 +67,7 @@ public:
         nodePrivate.param("enable", enable_, false);
         nodePrivate.param("zero_speed", zeroSpeed_, true);
         nodePrivate.param("base_frame", baseFrame_, string("camera_link"));
+        nodePrivate.param("target", trackingTarget_, string("person"));
 
         detectedObjectsSubscriber_ = node.subscribe("detected_objects", 1, 
                 &PersonFollower::detectedObjectsCallback, this);
@@ -118,7 +119,8 @@ private:
             //
             // Person detected
             //
-            if (object.text == "person") {
+            
+            if (object.text == trackingTarget_) {
 
                 tf::Vector3 poseVector(0, 0, 0);
 
@@ -333,6 +335,8 @@ private:
     double steeringFactor_;
 
     bool enable_;
+
+    std::string trackingTarget_;
 
 };
 
