@@ -24,3 +24,4 @@ services:
     network_mode: "host"
     command: [ "cam4", "944622074845", "0", "0", "0", "-4.7123889803", "0", "0" ]
     restart: always
+  

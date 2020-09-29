@@ -6,19 +6,29 @@
     <!--  
         Object pose estimation
     -->
-    <node name="hupster_object_pose_estimation_node" pkg="hupster_detection" 
+    <node name="pengo_object_pose_estimation_node" pkg="hupster_detection" 
           type="hupster_object_pose_estimation_node" respawn="true" >
         <remap from="/camera/aligned_depth_to_color/image_raw" to="/$(arg camera_name)/aligned_depth_to_color/image_raw" />
         <remap from="/camera/color/camera_info" to="/$(arg camera_name)/color/camera_info" />
     </node>
 
-    <node name="hupster_object_pose_filter_node" pkg="hupster_detection"
+    <node name="pengo_navigation_node" pkg="hupster_detection"
           type="person_follower_node">
-        <param name="target" value="$(arg tracking_target)"/>
-        <param name="odom_frame" value="odom"/>
-        <param name="timeout" value="3.0"/>
-        <param name="rate" value="1.0"/>
-        <remap from="person_follower/target" to="move_base_simple/goal"/>
+        <!-- <param name="target" value="$(arg tracking_target)"/> -->
+        <!-- <param name="odom_frame" value="odom"/>
+        <param name="timeout" value="10.0"/>
+        <param name="rate" value="2.0"/>
+        <remap from="person_follower/target" to="move_base_simple/goal"/> -->
+
+        <param name="min_distance" value="1.0" />
+        <param name="max_distance" value="3.0" />
+        <param name="max_speed" value="0.8" />
+        <param name="min_speed" value="0.2" />
+        <param name="steering_factor" value="0.04" />
+        <param name="enable" value="true" />
+        <param name="base_frame" value="base_link" />
+        <remap from="mobile_base/commands/velocity" to="navigation_velocity_smoother/raw_cmd_vel" />
+        
     </node>
 
 </launch>

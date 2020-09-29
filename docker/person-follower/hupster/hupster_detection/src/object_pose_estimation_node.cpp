@@ -142,7 +142,7 @@ private:
                         object.roi.y_offset + object.roi.height / 2);
                 auto objectRay = cameraModel_.projectPixelTo3dRay(centerPixel);
                 double bearing = atan2(objectRay.z, -objectRay.x);
-                double distance = cv::norm(centerOfMass) - 0.4;
+                double distance = cv::norm(centerOfMass) - 0.6;
 
                 tf::Vector3 objectVector(distance * sin(bearing), 
                         distance * cos(bearing), 0);
