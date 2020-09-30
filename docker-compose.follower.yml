@@ -1,0 +1,76 @@
+version: '3'
+
+networks:
+  ros:
+    driver: bridge
+
+services:
+  master:
+    image: ros:melodic
+    command: roscore
+    networks:
+      - ros
+    ports:
+      - 11311
+    restart: always
+
+
+  d435:
+    privileged: true
+    image: intelpengo/realsense2
+    environment:
+      - "ROS_HOSTNAME=d435"
+      - "ROS_MASTER_URI:http://master:11311"
+    command: [ "/rs_camera.sh", "cam1", "939622072996", "0.17", "0", "0.27", "0", "0", "0" ]
+    networks:
+      - ros
+    restart: always
+  
+  kobuki-driver:
+    privileged: true
+    image: intelpengo/kobuki-driver:latest
+    environment:
+      - "ROS_HOSTNAME=kobuki-driver"
+      - "ROS_MASTER_URI:http://master:11311"
+    command: ["/dev/ttyUSB1"]
+    networks:
+      - ros
+    restart: always
+
+  kobuki-navigation:
+    privileged: true
+    image: intelpengo/kobuki-navigation:latest
+    environment:
+      - "ROS_HOSTNAME=kobuki-navigation"
+      - "ROS_MASTER_URI:http://master:11311"
+    networks:
+      - ros
+    restart: always
+
+  openvino:
+    privileged: true
+    image: intelpengo/openvino
+    environment:
+      - "ROS_HOSTNAME=openvino"
+      - "ROS_MASTER_URI:http://master:11311"
+    command: ["roslaunch vino_launch pengo_detection.launch", "myriad:=true", "camera_name:=cam1"]
+    networks:
+      - ros
+    restart: always
+
+  person-follower:
+    privileged: true
+    image: intelpengo/person-follower
+    environment:
+      - "ROS_HOSTNAME=person-follower"
+      - "ROS_MASTER_URI:http://master:11311"
+    networks:
+      - ros
+    restart: always
+
+
+
+   
+
+
+  
