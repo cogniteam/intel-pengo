@@ -5,7 +5,7 @@ set -e
 SLEEP_TIME=5
 
 roscore &
-sleep 5
+sleep 20
 
 #
 # OpenVino Myriad
