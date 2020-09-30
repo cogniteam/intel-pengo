@@ -2,10 +2,10 @@
 
 set -e 
 
-SLEEP_TIME=5
+SLEEP_TIME=20
 
 roscore &
-sleep 20
+sleep 10
 
 #
 # OpenVino Myriad
@@ -39,14 +39,14 @@ sleep 1
 #
 
 docker run -d -e ROS_MASTER_URI -e ROS_IP --net=host intelpengo/person-follower:latest
-sleep1
+sleep 1
 
 #
 # ROS slam-toolbox
 #
 
 docker run -d -e ROS_MASTER_URI -e ROS_IP --net=host intelpengo/slam-toolbox:latest
-sleep1
+sleep 1
 
 #
 # RP Lidar
