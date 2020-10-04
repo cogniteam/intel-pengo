@@ -33,4 +33,4 @@ jobs:
           file: docker/rplidar/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/rplidar
+          tags: cogniteam/rplidar

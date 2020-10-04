@@ -1,4 +1,4 @@
-FROM intelpengo/realsense2
+FROM cogniteam/realsense2
 RUN apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE && \
         echo "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo bionic main" > /etc/apt/sources.list.d/realsense-sdk.list && \
         apt -q -qq update && DEBIAN_FRONTEND=noninteractive apt -y install wget unzip librealsense2-utils ros-${ROS_DISTRO}-realsense2-camera  && rm -rf /var/lib/apt/lists/* && \

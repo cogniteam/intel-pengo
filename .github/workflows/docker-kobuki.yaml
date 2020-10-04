@@ -33,7 +33,7 @@ jobs:
           file: docker/kobuki-driver/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/kobuki-driver
+          tags: cogniteam/kobuki-driver
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -42,4 +42,4 @@ jobs:
           file: docker/kobuki-navigation/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/kobuki-navigation
+          tags: cogniteam/kobuki-navigation

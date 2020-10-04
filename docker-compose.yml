@@ -2,25 +2,25 @@ version: '3'
 services:
   realsense1:
     privileged: true
-    image: intelpengo/realsense2
+    image: cogniteam/realsense2
     network_mode: "host"
     command: [ "cam1", "947122070333", "0", "0", "0", "0", "0", "0" ]
     restart: always
   realsense2:
     privileged: true
-    image: intelpengo/realsense2
+    image: cogniteam/realsense2
     network_mode: "host"
     command: [ "cam2", "939622072996", "0", "0", "0", "-1.570796326", "0", "0" ]
     restart: always
   realsense3:
     privileged: true
-    image: intelpengo/realsense2
+    image: cogniteam/realsense2
     network_mode: "host"
     command: [ "cam3", "944622073450", "0", "0", "0", "-3.14159265", "0", "0" ]
     restart: always
   realsense4:
     privileged: true
-    image: intelpengo/realsense2
+    image: cogniteam/realsense2
     network_mode: "host"
     command: [ "cam4", "944622074845", "0", "0", "0", "-4.7123889803", "0", "0" ]
     restart: always

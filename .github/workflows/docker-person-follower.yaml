@@ -33,4 +33,4 @@ jobs:
           file: docker/person-follower/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/person-follower
+          tags: cogniteam/person-follower

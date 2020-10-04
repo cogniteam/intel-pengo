@@ -39,4 +39,4 @@ jobs:
           file: docker/openvino/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/openvino
+          tags: cogniteam/openvino

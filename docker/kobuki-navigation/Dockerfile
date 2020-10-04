@@ -1,4 +1,4 @@
-FROM intelpengo/kobuki-driver
+FROM cogniteam/kobuki-driver
 
 RUN apt update && apt install -y ros-${ROS_DISTRO}-move-base ros-${ROS_DISTRO}-dwa-local-planner && rm /var/lib/apt/lists/* -rf
 

@@ -17,7 +17,7 @@ services:
 
   d435:
     privileged: true
-    image: intelpengo/realsense2
+    image: cogniteam/realsense2
     environment:
       - "ROS_HOSTNAME=d435"
       - "ROS_MASTER_URI:http://master:11311"
@@ -28,7 +28,7 @@ services:
   
   kobuki-driver:
     privileged: true
-    image: intelpengo/kobuki-driver:latest
+    image: cogniteam/kobuki-driver:latest
     environment:
       - "ROS_HOSTNAME=kobuki-driver"
       - "ROS_MASTER_URI:http://master:11311"
@@ -39,7 +39,7 @@ services:
 
   kobuki-navigation:
     privileged: true
-    image: intelpengo/kobuki-navigation:latest
+    image: cogniteam/kobuki-navigation:latest
     environment:
       - "ROS_HOSTNAME=kobuki-navigation"
       - "ROS_MASTER_URI:http://master:11311"
@@ -49,7 +49,7 @@ services:
 
   openvino:
     privileged: true
-    image: intelpengo/openvino
+    image: cogniteam/openvino
     environment:
       - "ROS_HOSTNAME=openvino"
       - "ROS_MASTER_URI:http://master:11311"
@@ -60,7 +60,7 @@ services:
 
   person-follower:
     privileged: true
-    image: intelpengo/person-follower
+    image: cogniteam/person-follower
     environment:
       - "ROS_HOSTNAME=person-follower"
       - "ROS_MASTER_URI:http://master:11311"

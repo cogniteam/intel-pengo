@@ -33,4 +33,4 @@ jobs:
           file: docker/slam-toolbox/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/slam-toolbox
+          tags: cogniteam/slam-toolbox

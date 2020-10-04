@@ -33,7 +33,7 @@ jobs:
           file: docker/realsense2/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/realsense2
+          tags: cogniteam/realsense2
       -
         name: Build and push realsense2-updater
         uses: docker/build-push-action@v2
@@ -42,7 +42,7 @@ jobs:
           file: docker/realsense2-updater/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: intelpengo/realsense2-updater
+          tags: cogniteam/realsense2-updater
       -
         name: Build and push realsense2-t265
         uses: docker/build-push-action@v2
@@ -51,4 +51,4 @@ jobs:
           file: docker/realsense2-t265/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: intelpengo/realsense2-t265
+          tags: cogniteam/realsense2-t265
