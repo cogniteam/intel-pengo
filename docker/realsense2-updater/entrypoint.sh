@@ -13,7 +13,7 @@ if [ "$COMMAND" = 'update' ]; then
         ;;
     esac
 elif [ "$COMMAND" = 'enumerate' ]; then
-    rs-enumerate-devices
+    rs-enumerate-devices -S
 else
     rs-fw-update $COMMAND
 fi 
