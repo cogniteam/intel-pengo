@@ -12,6 +12,8 @@ if [ "$COMMAND" = 'update' ]; then
         rs-fw-update -f Signed_Image_UVC_5_12_7_100.bin
         ;;
     esac
+elif [ "$COMMAND" = 'enumerate' ]; then
+    rs-enumerate-devices
 else
     rs-fw-update $COMMAND
 fi 
