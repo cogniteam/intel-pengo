@@ -1,4 +1,4 @@
-name: docker-build:keyboard-teleop
+name: docker-build:joy-teleop
 
 on:
   push:
@@ -29,17 +29,17 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: docker/keyboard-teleop/
-          file: docker/keyboard-teleop/Dockerfile
+          context: docker/joy-teleop/
+          file: docker/joy-teleop/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: cogniteam/keyboard-teleop
+          tags: cogniteam/joy-teleop
       -
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: docker/keyboard-teleop/
-          file: docker/keyboard-teleop/Dockerfile
+          context: docker/joy-teleop/
+          file: docker/joy-teleop/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: cogniteam/keyboard-teleop
+          tags: cogniteam/joy-teleop
