@@ -149,3 +149,8 @@ RUN python3.6 -m pip install -r requirements.txt && \
 #
 # Ready !
 #
+
+COPY ./entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
+
