@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+
 # setup ros environment
 . /opt/ros/$ROS_DISTRO/setup.bash
 
@@ -13,4 +14,4 @@ ROLL=${6:-0}
 
 rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link laser &
 
-roslaunch rplidar_ros rplidar.launch 
+exec roslaunch rplidar_ros rplidar.launch 

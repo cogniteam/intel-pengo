@@ -12,4 +12,4 @@ PITCH=${5:-0}
 ROLL=${6:-0}
 
 # Twist from keyboard
-rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+exec rosrun teleop_twist_keyboard teleop_twist_keyboard.py
