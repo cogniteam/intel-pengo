@@ -38,6 +38,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <tf/transform_listener.h>
 #include <angles/angles.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -59,15 +60,15 @@ public:
         ros::NodeHandle node;
         ros::NodeHandle nodePrivate("~");
 
+        nodePrivate.param("tracking_timeout", trackingTimeout_, 2.0);
         nodePrivate.param("min_distance", minDistance_, 1.5);
         nodePrivate.param("max_distance", maxDistance_, 5.0);
         nodePrivate.param("max_speed", maxSpeed_, 110.0);
         nodePrivate.param("min_speed", minSpeed_, 110.0);
         nodePrivate.param("steering_factor", steeringFactor_, 3.0);
         nodePrivate.param("enable", enable_, false);
-        nodePrivate.param("zero_speed", zeroSpeed_, true);
         nodePrivate.param("base_frame", baseFrame_, string("camera_link"));
-        nodePrivate.param("target", trackingTarget_, string("person"));
+        nodePrivate.param("target", trackingTargetClassName_, string("person"));
 
         detectedObjectsSubscriber_ = node.subscribe("detected_objects", 1, 
                 &PersonFollower::detectedObjectsCallback, this);
@@ -83,6 +84,9 @@ public:
         statePublisher_ = node.advertise<std_msgs::Bool>(
                 "events/person_follower/state", 1, true);
                         
+        trackingStatePublisher_ = node.advertise<std_msgs::String>(
+                "events/person_follower/tracking_state", 1, true);
+                        
         targetPublisher_ = node.advertise<geometry_msgs::PoseStamped>(
                 "debug/person_follower/target", 1, false);
 
@@ -92,6 +96,9 @@ public:
         lastTargetUpdateTime_ = ros::Time::now() - ros::Duration(1000);
 
         publishState();
+
+        updateTrackingState("lost");
+
     }
 
     virtual ~PersonFollower() {
@@ -99,6 +106,24 @@ public:
     }
 
 private:
+
+    /**
+     * @brief 
+     * @param newState 
+     */
+    void updateTrackingState(string newState) {
+        
+        // Test if new state transition
+        if (newState != trackingState_) {
+            trackingState_ = newState;
+
+            // Publish state update
+            std_msgs::String msg;
+            msg.data = newState;
+            this->trackingStatePublisher_.publish(msg);
+        }
+
+    }
 
     void publishState() {
         std_msgs::Bool state;
@@ -120,7 +145,7 @@ private:
             // Person detected
             //
             
-            if (object.text == trackingTarget_) {
+            if (object.text == trackingTargetClassName_) {
 
                 tf::Vector3 poseVector(0, 0, 0);
 
@@ -151,8 +176,6 @@ private:
         //
         if (personFound) {
             updateTarget(closestPerson);
-        } else {
-            targetPublisher_.publish(geometry_msgs::PoseStamped());
         }
 
     }
@@ -181,6 +204,10 @@ private:
         return result;
     }
 
+    /**
+     * @brief Target found
+     * @param target 
+     */
     void updateTarget(const tf::Vector3& target) {
         ROS_INFO("Target updated [%f, %f]", target.x(), target.y());
         lastTargetUpdateTime_ = ros::Time::now();
@@ -195,32 +222,43 @@ private:
         targetPublisher_.publish(targetMsg);
     }
 
+    /**
+     * @brief 
+     */
     void updateTimerCallback(const ros::TimerEvent&) {
 
         //
         // Stop the robot if there were no detections for this amount of time
         //
-        const ros::Duration detectionTimeout(0.3);
+        const ros::Duration detectionTimeout(trackingTimeout_);
 
         auto lastDetectionAge = ros::Time::now() - lastTargetUpdateTime_;
         
         if (lastDetectionAge > detectionTimeout) {
-
-            if (detectionActive_) {
-                ROS_WARN("Person lost, stopping");
+            
+            // First time the target is lost - stop the robot and update 
+            // tracking state
+            if (trackingActive_) {
+                ROS_WARN("Person lost, stop the aggression");
+                updateTrackingState("lost");
                 publishCommand(0, 0);
-                detectionActive_ = false;
+                trackingActive_ = false;
             } else {
                 // Waiting for detections...
-                ROS_INFO_THROTTLE(1.0, "Waiting for detections...");
+                ROS_INFO_THROTTLE(1.0, "Searching for a prey...");
             }
-
-            publishCommand(0, 0);
 
             return;
 
         } else {
-            detectionActive_ = true;
+
+            if (!trackingActive_) {
+                trackingActive_ = true;
+                updateTrackingState("tracking");
+                ROS_INFO("Meatbag detected, attack it!");
+            } else {
+                ROS_INFO_THROTTLE(1.0, "Tracking...");
+            }
         }
 
         //
@@ -240,29 +278,40 @@ private:
         double speedRange = maxSpeed_ - minSpeed_;
         double easeFunction = -0.5 * (cos(M_PI * targetDistanceRatio) - 1);
         double speed = minSpeed_ + speedRange * easeFunction;
-        
-        // 
-        // Person is too close
-        //
-        if (distanceToTarget < minDistance_) {
-            ROS_INFO("Person is close, stop [%f]", distanceToTarget);
-            speed = 0.0;
-        }
-
-        //
-        // Person is too far
-        //
-        if (distanceToTarget > maxDistance_) {
-            ROS_INFO("Person too far, stop [%f]", distanceToTarget);
-            speed = 0.0;
-        }
-
-        // Distance is OK - following
-
         double bearing = atan2(target_.y(), target_.x());
         double steeringAngle = angles::to_degrees(bearing) * steeringFactor_;
 
-        ROS_INFO("Following [Distance = %f, Angle = %i]", distanceToTarget, (int)angles::to_degrees(bearing));
+
+        //
+        // Set speed to zero if target is not within min/max range but
+        // still calculate bering to allow rotation in place to follow the
+        // target
+        //
+        if (distanceToTarget < minDistance_) {
+            // 
+            // Person is too close
+            //
+            ROS_INFO("Prey is too close, wait for it to run away [%f]", 
+                    distanceToTarget);
+
+            speed = 0.0;
+
+        } else if (distanceToTarget > maxDistance_) {
+            //
+            // Person is too far
+            //
+            ROS_INFO("Prey is too far, lure it by intensive waiting [%f]", 
+                    distanceToTarget);
+
+            speed = 0.0;
+            
+        } else {
+            //
+            // Distance is OK - following
+            //
+            ROS_INFO("Stalking [Distance = %f, Angle = %i]", distanceToTarget, 
+                    (int)angles::to_degrees(bearing));
+        }
 
         publishCommand(speed, steeringAngle);
 
@@ -274,20 +323,18 @@ private:
             return;
         }
 
+        //
+        // Ackermann model command publisher
+        //
         ackermann_msgs::AckermannDriveStamped cmd;
         cmd.header.stamp = ros::Time::now();
-
-        if (!zeroSpeed_ && fabs(speed) < 0.001) {
-            speed = 0;
-            steeringAngle = 0;
-        }
-
         cmd.drive.speed = speed;
         cmd.drive.steering_angle = steeringAngle;
         commandPublisher_.publish(cmd);
-
-        //Pengo publisher
-
+        
+        //
+        // Diff drive model command publisher
+        //
         geometry_msgs::Twist command;
         command.linear.x = speed;
         command.angular.z = steeringAngle;
@@ -306,6 +353,8 @@ private:
 
     ros::Publisher statePublisher_;
 
+    ros::Publisher trackingStatePublisher_;
+
     ros::Publisher twistCommandPublisher_;
 
     ros::Subscriber detectedObjectsSubscriber_;
@@ -320,11 +369,13 @@ private:
 
     ros::Timer updateTimer_;
 
-    bool detectionActive_ = false;
+    bool trackingActive_ = false;
 
     bool zeroSpeed_;
 
     double minDistance_;
+
+    double trackingTimeout_;
 
     double maxDistance_;
 
@@ -336,7 +387,15 @@ private:
 
     bool enable_;
 
-    std::string trackingTarget_;
+    /**
+     * @brief Default is 'person'
+     */
+    std::string trackingTargetClassName_;
+
+    /**
+     * @brief 'lost' or 'tracking'
+     */
+    std::string trackingState_ = "";
 
 };
 

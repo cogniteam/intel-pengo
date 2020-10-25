@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pengo_stalker</name>
+  <version>1.0.0</version>
+  <description>Pengo patrol mission</description>
+  <maintainer email="igor@cogniteam.com">igor@cogniteam.com</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>kobuki_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>tf</depend>
+  <depend>actionlib</depend>
+  <depend>move_base_msgs</depend>
+</package>

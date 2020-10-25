@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="pengo_stalker_node" pkg="pengo_stalker" type="pengo_stalker_node" />
+
+</launch>
