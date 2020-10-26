@@ -1,4 +1,4 @@
 FROM cogniteam/realsense2
-COPY ./entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT [ "/entrypoint.sh" ]
+COPY ./rs_camera.sh /
+RUN chmod +x /rs_camera.sh
+CMD /rs_camera.sh t265 0 0 0 0 0 0 0
