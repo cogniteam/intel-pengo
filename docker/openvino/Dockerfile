@@ -29,7 +29,7 @@ RUN apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8
         add-apt-repository ppa:deadsnakes/ppa -y && \
         add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo `lsb_release -cs` main" -y && \
         apt update && \
-        apt install librealsense2-dev ros-kinetic-realsense2-camera python3.6 unzip -y && \
+        apt install librealsense2-dev ros-kinetic-realsense2-camera python3.6 autoconf libtool unzip -y && \
         curl https://bootstrap.pypa.io/get-pip.py | python3.6 && \
         rm /var/lib/apt/lists/* -rf
 
