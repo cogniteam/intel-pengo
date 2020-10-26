@@ -113,12 +113,17 @@ void PengoStalkerRos::generatePatrolRoute(int pointsCount, double radius) {
     for (int i = 0; i < pointsCount; i++) {
         double angleStep = ((M_PI * 2) / pointsCount);
 
+
+        tf::Vector3 point(
+                radius * cos(angleStep * i),
+                radius * sin(angleStep * i), 
+                0);
+
+        double angle = atan2(point.y(), point.x());
+
         tf::Transform offset(
-                tf::Quaternion::getIdentity(), 
-                tf::Vector3(
-                        radius * cos(angleStep * i),
-                        radius * sin(angleStep * i), 
-                        0));
+                tf::createQuaternionFromYaw(angle), 
+                point);
 
         auto newPoseTf = odomPoseTf_ * offset;
 

@@ -28,6 +28,7 @@ int main(int argc, char**argv)
 {
     ros::init(argc, argv, "pengo_stalker_node");
     ros::NodeHandle nodeHandle;
-    pengo::PengoStalkerRos pengoStalkerRos;    
+    pengo::PengoStalkerRos pengoStalkerRos;
+    ros::spin();
     return 0;
 }
