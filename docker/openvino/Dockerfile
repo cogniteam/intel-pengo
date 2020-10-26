@@ -33,6 +33,16 @@ RUN apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8
         curl https://bootstrap.pypa.io/get-pip.py | python3.6 && \
         rm /var/lib/apt/lists/* -rf
 
+#
+# https://docs.openvinotoolkit.org/2018_R5/_docs_install_guides_installing_openvino_docker.html
+#
+RUN cd /tmp/ && \
+   wget https://github.com/libusb/libusb/archive/v1.0.22.zip && \
+   unzip v1.0.22.zip && cd libusb-1.0.22 && \
+   ./bootstrap.sh && \
+   ./configure --disable-udev --enable-shared && \
+   make -j4 && make install && \
+   rm -rf /tmp/*
 
 #
 # 1. Download OpenVINO 2018 R5 
