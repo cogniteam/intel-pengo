@@ -34,6 +34,10 @@ PengoStalkerRos::PengoStalkerRos() {
     odomPoseTf_.setIdentity();
 
     ros::NodeHandle node;
+    ros::NodeHandle nodePrivate("~");
+
+    nodePrivate.param("patrol_points", patrolPoints_, 5);
+    nodePrivate.param("patrol_radius", patrolRadius_, 0.5);
 
     moveBaseActionClient_.reset(
             new actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>(
@@ -42,7 +46,8 @@ PengoStalkerRos::PengoStalkerRos() {
     odomSubscriber_ = node.subscribe("odom", 10, 
             &PengoStalkerRos::odometryCallback, this);
 
-    visualOdomSubscriber_ = node.subscribe("camera/odom", 10, 
+    // TODO Visual odometry disabled, using wheel odometry for person following only
+    visualOdomSubscriber_ = node.subscribe("visual_odom", 10, 
             &PengoStalkerRos::visualOdometryCallback, this);
 
     wheelDropEventSubscriber_ = node.subscribe("mobile_base/events/wheel_drop", 
@@ -50,9 +55,24 @@ PengoStalkerRos::PengoStalkerRos() {
 
     enableSubscriber_ = node.subscribe("commands/pengo_stalker/enable", 
             1, &PengoStalkerRos::enableCallback, this);
+
+    personFollowerStateSubscriber_ = node.subscribe(
+            "events/person_follower/tracking_state", 1, 
+            &PengoStalkerRos::personFollowerStateCallback, this);
     
     personFollowEnablePublisher_ = node.advertise<std_msgs::Bool>(
             "commands/person_follower/enable", 1, true);
+
+    patrolPathPublisher_ = node.advertise<nav_msgs::Path>(
+            "pengo_stalker/patrol_path", 1, true);
+
+    recordedPathPublisher_ = node.advertise<nav_msgs::Path>(
+            "pengo_stalker/recorded_path", 1, true);
+
+    clearCostmapsService_ = node.serviceClient<std_srvs::Empty>(
+            "move_base/clear_costmaps", true);
+
+    ROS_INFO("Stalker initialized!");
 }
 
 /**
@@ -69,12 +89,14 @@ PengoStalkerRos::~PengoStalkerRos() {
  */
 void PengoStalkerRos::startPatrol() {
 
+    ROS_INFO("Starting patrol mission...");
+
     setPersonFollowerEnabled(false);
 
     this->updateState(MissionState::Patroling);
 
     // First generate patrol route
-    generatePatrolRoute(4, 0.5);
+    generatePatrolRoute(patrolPoints_, patrolRadius_);
 
     // Reset current point index
     currentPatrolPointIndex_ = 0;
@@ -88,10 +110,14 @@ void PengoStalkerRos::startPatrol() {
  */
 void PengoStalkerRos::stopPatrol() {
 
+    ROS_INFO("Stopping mission...");
+
     // Stop navigation
     moveBaseActionClient_->cancelAllGoals();
 
     this->updateState(MissionState::Idle);
+
+    ROS_INFO("Mission stopped");
 }
 
 /**
@@ -138,6 +164,8 @@ void PengoStalkerRos::generatePatrolRoute(int pointsCount, double radius) {
 
     }
 
+    patrolPathPublisher_.publish(this->patrolPath_);
+
     ROS_INFO("Patrol route created");
     
 }
@@ -161,6 +189,7 @@ void PengoStalkerRos::startNavigationToNextPatrolPoint() {
     goal.target_pose.header.stamp = ros::Time::now();
 
     ROS_INFO("Going to patrol point #%i", currentPatrolPointIndex_);
+    clearCostmaps();
 
     // Increment to next waypoint
     currentPatrolPointIndex_++;
@@ -201,18 +230,6 @@ void PengoStalkerRos::startNavigationToNextRecordedPathPoint() {
     
 }
 
-template<typename T>
-void pop_front(std::vector<T>& vec)
-{
-
-    if (vec.size() == 0) {
-        return;
-    }
-
-    vec.front() = std::move(vec.back());
-    vec.pop_back();
-}
-
 /**
  * @brief 
  * @param state 
@@ -222,36 +239,42 @@ void PengoStalkerRos::navigationGoalReached(
         const actionlib::SimpleClientGoalState& state,
         const move_base_msgs::MoveBaseResult::ConstPtr& result) {
   
+    // Run in background
+    std::thread t([&]() {
 
-    if (this->missionState_ == MissionState::Patroling) {
-        ROS_INFO("Patrol point reached");
-        // Run in thread
-        std::future<void> fut = std::async(std::launch::async, [&]() {
-            startNavigationToNextPatrolPoint();
-        });
+        if (this->missionState_ == MissionState::Patroling) {
+            ROS_INFO("Patrol point reached");
+            // Run in thread
+            std::future<void> fut = std::async(std::launch::async, [&]() {
+                startNavigationToNextPatrolPoint();
+            });
 
-    } else if (this->missionState_ == MissionState::Backtracking) {
-        ROS_INFO("Backtrack point reached");
+        } else if (this->missionState_ == MissionState::Backtracking) {
+            ROS_INFO("Backtrack point reached");
 
-        // Erase first point, and move to next one
-        pop_front(visualOdometryPath_->poses);
+            // Erase last point, and move to next one
+            visualOdometryPath_->poses.pop_back();
 
-        // Check finish condition
-        if (visualOdometryPath_->poses.size() == 0) {
-            // Done
-            ROS_INFO("Backtracking finished, continuing patrol...");
-            updateState(MissionState::Patroling);
-            return;
+            // Check finish condition
+            if (visualOdometryPath_->poses.size() == 0) {
+                // Done
+                ROS_INFO("Backtracking finished, continuing patrol...");
+                updateState(MissionState::Patroling);
+                return;
+            }
+
+            // Run in thread
+            std::future<void> fut = std::async(std::launch::async, [&]() {
+                startNavigationToNextRecordedPathPoint();
+            });
+
+        } else {
+            ROS_INFO("Navigation finished outside Patroling mission state");
         }
 
-        // Run in thread
-        std::future<void> fut = std::async(std::launch::async, [&]() {
-            startNavigationToNextRecordedPathPoint();
-        });
+    });
 
-    } else {
-        ROS_INFO("Navigation finished outside Patroling mission state");
-    }
+    t.detach();
     
 }
 
@@ -261,16 +284,33 @@ void PengoStalkerRos::navigationGoalReached(
  */
 void PengoStalkerRos::updateState(MissionState newState) {
 
+    static std::map<MissionState, const char*> stateNames = {
+        { MissionState::Abducted, "Abducted" },
+        { MissionState::Backtracking, "Backtracking" },
+        { MissionState::Idle, "Idle" },
+        { MissionState::Patroling, "Patroling" },
+        { MissionState::Stalking, "Stalking" },
+    };
+
     if (missionState_ != newState) {
+
+        ROS_INFO("Changing mission state from '%s' to '%s'", 
+                stateNames[missionState_], stateNames[newState]);
+
         missionState_ = newState;
 
         switch (newState)
         {
             case MissionState::Patroling:
 
+                // Send first goal
+                startNavigationToNextPatrolPoint();
+
                 break;
             case MissionState::Abducted:
             case MissionState::Stalking: {
+
+                moveBaseActionClient_->cancelAllGoals();
                 
                 // We didn't reach the goal so decrease index to repeat the same
                 // goal on return
@@ -289,10 +329,18 @@ void PengoStalkerRos::updateState(MissionState newState) {
                 
                 clearCostmaps();
                 
-                // Reverse path
                 
-                std::reverse(visualOdometryPath_->poses.begin(), 
-                        visualOdometryPath_->poses.end());
+                //
+                // Rotate orientations 180 degrees
+                //
+                for (auto &&pose : visualOdometryPath_->poses)
+                {
+                    auto yaw = tf::getYaw(pose.pose.orientation);
+                    pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw + M_PI);
+                }
+
+                recordedPathPublisher_.publish(visualOdometryPath_);
+                
 
                 // Navigate
                 // Send goal
@@ -311,7 +359,9 @@ void PengoStalkerRos::updateState(MissionState newState) {
  * This method used to clear obstacles map which can block path planning
  */
 void PengoStalkerRos::clearCostmaps() {
-
+    ROS_INFO("Clearing costmaps...");
+    std_srvs::Empty s;
+    clearCostmapsService_.call(s);
 }
 
 /**
@@ -355,12 +405,17 @@ void PengoStalkerRos::visualOdometryCallback(
         //
         // 
         //
-        if (lastOdomPoint.distance(newOdomPoint) > 0.2) {
+        if (lastOdomPoint.distance(newOdomPoint) > 0.4) {
             geometry_msgs::PoseStamped poseStamped;
             poseStamped.header.frame_id = "odom";
             poseStamped.header.stamp = ros::Time::now();
             poseStamped.pose = odom->pose.pose;
             visualOdometryPath_->poses.push_back(poseStamped);
+
+            visualOdometryPath_->header.frame_id = "odom";
+            visualOdometryPath_->header.stamp = ros::Time::now();
+
+            recordedPathPublisher_.publish(visualOdometryPath_);
         }
 
     }
@@ -425,7 +480,11 @@ void PengoStalkerRos::wheelDropEventCallback(
  */
 void PengoStalkerRos::personFollowerStateCallback(
         const std_msgs::String::Ptr& state) {
-    
+        
+    // 
+    // TODO Subscribe
+    // 
+
     if (this->missionState_ == MissionState::Patroling &&
             state->data == "tracking") {
                 
@@ -449,6 +508,13 @@ void PengoStalkerRos::personFollowerStateCallback(
 void PengoStalkerRos::setPersonFollowerEnabled(bool enabled) {
     std_msgs::Bool msg;
     msg.data = enabled;
+
+    if (enabled) {
+        ROS_INFO("person follower enabled");
+    } else {
+        ROS_INFO("person follower disabled");
+    }
+
     personFollowEnablePublisher_.publish(msg);
 }
 

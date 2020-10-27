@@ -1,7 +1,8 @@
 <launch>
     
-    <arg name="camera_name" default="cam1" />
+    <arg name="camera_name" default="camera_front" />
     <arg name="tracking_target" default="person" />
+    <arg name="velocity_topic" default="navigation_velocity_smoother/raw_cmd_vel" />
 
     <!--  
         Object pose estimation
@@ -26,7 +27,7 @@
         <param name="steering_factor" value="0.04" />
         <param name="enable" value="true" />
         <param name="base_frame" value="base_link" />
-        <remap from="mobile_base/commands/velocity" to="navigation_velocity_smoother/raw_cmd_vel" />
+        <remap from="mobile_base/commands/velocity" to="$(arg velocity_topic)" />
         
     </node>
 

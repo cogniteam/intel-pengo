@@ -30,6 +30,7 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <kobuki_msgs/WheelDropEvent.h>
+#include <std_srvs/Empty.h>
 
 
 namespace pengo {
@@ -207,15 +208,35 @@ private:
     ros::Publisher personFollowEnablePublisher_;
 
     /**
+     * @brief Patrol path publisher
+     */
+    ros::Publisher patrolPathPublisher_;
+
+    /**
+     * @brief Recorded by from visual odometry publisher
+     */
+    ros::Publisher recordedPathPublisher_;
+
+    /**
      * @brief Robot platform odometry, used to calculate patrol route in odom
      * frame
      */
     ros::Subscriber odomSubscriber_;
 
     /**
+     * @brief 'tracking' or 'lost' from person follower node
+     */
+    ros::Subscriber personFollowerStateSubscriber_;
+
+    /**
      * @brief 
      */
     ros::Subscriber visualOdomSubscriber_;
+
+    /**
+     * @brief move_base clear costmaps
+     */
+    ros::ServiceClient clearCostmapsService_;
 
     /**
      * @brief 
@@ -263,10 +284,20 @@ private:
      */
     WheelsState wheelsState_;
 
+    /**
+     * @brief ROS param - number of patrol points to generate
+     */
+    int patrolPoints_;
+
+    /**
+     * @brief ROS param - distance of patrol points from current robot's pose
+     */
+    double patrolRadius_;
+
 };
 
 
-} /* */
+} /* namespace pengo */
 
 
 #endif /* EDF8BC6D_BE66_4974_B3A7_482FA54ED7EA */
