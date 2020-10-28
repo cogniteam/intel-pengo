@@ -28,6 +28,7 @@
   <arg name="publish_odom_tf"     default="true"/>
 
   <group ns="$(arg camera)">
+
     <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
       <!-- <arg name="odom_frame_id"            value="odom"/> -->
       <!-- <arg name="pose_frame_id"            value="$(arg camera)_link"/> -->
@@ -59,4 +60,46 @@
       <arg name="publish_odom_tf"          value="$(arg publish_odom_tf)"/>
     </include>
   </group>
+
+  <arg name="x" default="0" />
+  <arg name="y" default="0" />
+  <arg name="z" default="0" />
+  <arg name="roll" default="0" />
+  <arg name="pitch" default="0" />
+  <arg name="yaw" default="0" />
+
+  <!-- sensor input data -->
+  <arg name="odom_in_topic"         default="/$(arg camera)/odom/sample"/>
+  <!-- name of the odom topic outputed by the node -->
+  <arg name="odom_out_topic"        default="/odom"/>
+  <!-- name of the odom tf outputed by the node -->
+  <arg name="odom_out_frame"        default="odom"/>
+  <!--  -->
+  <arg name="base_frame"        default="base_footprint"/>
+  <arg name="odom_calc_hz"        default="50"/>
+  <!-- sensor offset values are in meters -->
+  <arg name="sensor_offset"         default='{"x": $(arg x), "y": $(arg y), "z": $(arg z)}'/>
+  <!-- sensor rotation values are in degrees -->
+  <arg name="sensor_rotation"       default='{"x": $(arg roll), "y": $(arg pitch), "z": $(arg yaw)}'/>
+  <!-- ignore x coordonate - value is CAPS sensitive (True/False) -->
+  <arg name="ignore_x"              default='False'/>
+  <!-- ignore y coordonate - value is CAPS sensitive (True/False) -->
+  <arg name="ignore_y"              default='False'/>
+  <!-- ignore z coordonate - value is CAPS sensitive (True/False) -->
+  <arg name="ignore_z"              default='True'/>
+
+  <node pkg="sensor_odom_manager" type="sensor_odom_manager_node.py" name="odom_manager" ns="sensor_odom_mngr" 
+          output="screen">
+      <param name="odom_in_topic"         value="$(arg odom_in_topic)"/>
+      <param name="odom_out_topic"        value="$(arg odom_out_topic)"/>
+      <param name="odom_out_frame"        value="$(arg odom_out_frame)"/>
+      <param name="sensor_offset"         value="$(arg sensor_offset)"/>
+      <param name="sensor_rotation"       value="$(arg sensor_rotation)"/>
+      <param name="ignore_x"              value="$(arg ignore_x)"/>
+      <param name="ignore_y"              value="$(arg ignore_y)"/>
+      <param name="ignore_z"              value="$(arg ignore_z)"/>
+      <param name="base_frame"              value="$(arg base_frame)"/>
+      <param name="odom_calc_hz"              value="$(arg odom_calc_hz)"/>
+  </node>
+
 </launch>
