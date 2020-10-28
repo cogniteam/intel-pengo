@@ -23,7 +23,7 @@ PITCH_INVERSE=$(bc <<< "-${7:-0}")
 ROLL_INVERSE=$(bc <<< "-${8:-0}")
 
 rosrun tf2_ros static_transform_publisher ${X_INVERSE} ${Y_INVERSE} ${Z_INVERSE} ${YAW_INVERSE} ${PITCH_INVERSE} ${ROLL_INVERSE} ${CAMERA_NAME}_pose_frame base_footprint &
-rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} odom t265_odom_frame &
-rosrun topic_tools relay /t265/odom/sample /odom &
+rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} odom ${CAMERA_NAME}_odom_frame &
+rosrun topic_tools relay /${CAMERA_NAME}/odom/sample /odom &
 
 exec roslaunch realsense2_camera rs_t265_pengo.launch enable_fisheye1:=true enable_fisheye2:=true camera:=${CAMERA_NAME} serial_no:=${SERIAL_NO} publish_odom_tf:=true
