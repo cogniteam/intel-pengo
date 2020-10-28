@@ -1,5 +1,6 @@
 <launch>
     
+    <arg name="enabled" default="true" />
     <arg name="camera_name" default="camera_front" />
     <arg name="tracking_target" default="person" />
     <arg name="velocity_topic" default="navigation_velocity_smoother/raw_cmd_vel" />
@@ -25,7 +26,7 @@
         <param name="max_speed" value="0.8" />
         <param name="min_speed" value="0.2" />
         <param name="steering_factor" value="0.04" />
-        <param name="enable" value="true" />
+        <param name="enable" value="$(arg enabled)" />
         <param name="base_frame" value="base_link" />
         <remap from="mobile_base/commands/velocity" to="$(arg velocity_topic)" />
         
