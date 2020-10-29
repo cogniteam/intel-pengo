@@ -54,7 +54,21 @@
         "deque": "cpp",
         "list": "cpp",
         "string": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "*.ipp": "cpp",
+        "strstream": "cpp",
+        "random": "cpp",
+        "sstream": "cpp",
+        "utility": "cpp",
+        "memory": "cpp",
+        "new": "cpp",
+        "string_view": "cpp",
+        "*.tpp": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "set": "cpp",
+        "stack": "cpp",
+        "stdexcept": "cpp"
     },
     //
     // @link https://code.visualstudio.com/docs/remote/wsl#_i-see-eaccess-permission-denied-error-trying-to-rename-a-folder-in-the-open-workspace

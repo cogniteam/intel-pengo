@@ -70,7 +70,7 @@ PengoStalkerRos::PengoStalkerRos() {
             "pengo_stalker/recorded_path", 1, true);
 
     clearCostmapsService_ = node.serviceClient<std_srvs::Empty>(
-            "move_base/clear_costmaps", true);
+            "move_base/clear_costmaps", false);
 
     ROS_INFO("Stalker initialized!");
 }
@@ -189,6 +189,7 @@ void PengoStalkerRos::startNavigationToNextPatrolPoint() {
     goal.target_pose.header.stamp = ros::Time::now();
 
     ROS_INFO("Going to patrol point #%i", currentPatrolPointIndex_);
+
     clearCostmaps();
 
     // Increment to next waypoint
@@ -221,12 +222,32 @@ void PengoStalkerRos::startNavigationToNextRecordedPathPoint() {
 
     ROS_INFO("Going back on recorded path #%i", 
             (int)(visualOdometryPath_->poses.size() - 1));
-
+    
+    clearCostmaps();
+    
     // Start move_base
     this->moveBaseActionClient_->sendGoal(
             goal, 
-            boost::bind(&PengoStalkerRos::navigationGoalReached, this, _1, _2));
+            boost::bind(&PengoStalkerRos::navigationGoalReached, this, _1, _2),
+            []() { 
+                // Navigation Activated
+            },
+            [&, goal](const move_base_msgs::MoveBaseFeedback::ConstPtr& f) -> void {
+                // Navigation feedback
+                tf::Vector3 currentPose = odomPoseTf_.getOrigin();
+                tf::Vector3 goalPose;
 
+                tf::pointMsgToTF(goal.target_pose.pose.position, goalPose);
+                
+                if (currentPose.distance(goalPose) < 0.6) {
+                    // Cancel current goal???
+                    // 
+                    navigationGoalReached(actionlib::SimpleClientGoalState(
+                            actionlib::SimpleClientGoalState::StateEnum::PREEMPTED), 
+                            move_base_msgs::MoveBaseResult::ConstPtr());
+                }
+
+            });
     
 }
 
@@ -316,8 +337,12 @@ void PengoStalkerRos::updateState(MissionState newState) {
                 // goal on return
                 currentPatrolPointIndex_--;
 
+                if (newState == MissionState::Stalking) {
+                    this->setPersonFollowerEnabled(true);
+                }
+
                 // Start recording new path
-                this->setPersonFollowerEnabled(true);
+
                 visualOdometryPath_.reset(new nav_msgs::Path());
                 break;
             }
@@ -326,6 +351,7 @@ void PengoStalkerRos::updateState(MissionState newState) {
                 this->setPersonFollowerEnabled(false);
                 
                 // Clear costmaps
+                boost::this_thread::sleep(boost::posix_time::seconds(2));
                 
                 clearCostmaps();
                 
@@ -338,6 +364,17 @@ void PengoStalkerRos::updateState(MissionState newState) {
                     auto yaw = tf::getYaw(pose.pose.orientation);
                     pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw + M_PI);
                 }
+
+                for (int i = visualOdometryPath_->poses.size() - 1; i >= 1; i--)
+                {
+                    auto&& nextPose = visualOdometryPath_->poses[i - 1];
+                    auto&& currentPose = visualOdometryPath_->poses[i];
+
+                    currentPose.pose.orientation = tf::createQuaternionMsgFromYaw(
+                            atan2(nextPose.pose.position.y - currentPose.pose.position.y,
+                                    nextPose.pose.position.x - currentPose.pose.position.x));
+                }
+                
 
                 recordedPathPublisher_.publish(visualOdometryPath_);
                 
