@@ -61,4 +61,12 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: cogniteam/depth-to-scan
-    
+      -
+        name: Build and push realsense2-rtabmap
+        uses: docker/build-push-action@v2
+        with:
+          context: docker/realsense2-rtabmap/
+          file: docker/realsense2-rtabmap/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: cogniteam/realsense2-rtabmap
