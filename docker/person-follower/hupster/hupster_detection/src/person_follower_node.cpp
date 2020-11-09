@@ -65,6 +65,10 @@ public:
         nodePrivate.param("max_distance", maxDistance_, 5.0);
         nodePrivate.param("max_speed", maxSpeed_, 110.0);
         nodePrivate.param("min_speed", minSpeed_, 110.0);
+
+        nodePrivate.param("min_rotation", minRotation_, 0.1);
+        nodePrivate.param("max_rotation", maxRotation_, 0.5);
+
         nodePrivate.param("steering_factor", steeringFactor_, 3.0);
         nodePrivate.param("enable", enable_, false);
         nodePrivate.param("base_frame", baseFrame_, string("camera_link"));
@@ -279,7 +283,6 @@ private:
         double easeFunction = -0.5 * (cos(M_PI * targetDistanceRatio) - 1);
         double speed = minSpeed_ + speedRange * easeFunction;
         double bearing = atan2(target_.y(), target_.x());
-        double steeringAngle = angles::to_degrees(bearing) * steeringFactor_;
 
 
         //
@@ -311,6 +314,44 @@ private:
             //
             ROS_INFO("Stalking [Distance = %f, Angle = %i]", distanceToTarget, 
                     (int)angles::to_degrees(bearing));
+        }
+
+        double bearingClamped;
+        const double MAX_BEARING = angles::from_degrees(50);
+
+        if (angles::to_degrees(bearing) > 50) {
+            bearing = MAX_BEARING;
+        }
+
+        if (angles::to_degrees(bearing) < -50) {
+            bearing = -MAX_BEARING;
+        }
+
+        double steeringAngle = 0;
+
+        if (bearing > 0) {
+            steeringAngle = minRotation_ + ((bearing / MAX_BEARING) * (maxRotation_ - minRotation_));
+        } else {
+            steeringAngle = -minRotation_ - ((bearing / MAX_BEARING) * (maxRotation_ - minRotation_));
+        }
+
+        if (steeringAngle > maxRotation_) {
+            steeringAngle = maxRotation_;
+        }
+
+        if (steeringAngle < -maxRotation_) {
+            steeringAngle = -maxRotation_;
+        }
+
+        if (speed == 0) {
+
+            bool targetInCenter = fabs(angles::to_degrees(bearing)) < 5.0;
+
+            // Don't steer
+            if (targetInCenter) {
+                steeringAngle = 0;
+            }
+
         }
 
         publishCommand(speed, steeringAngle);
@@ -382,6 +423,10 @@ private:
     double minSpeed_;
 
     double maxSpeed_;
+
+    double minRotation_;
+
+    double maxRotation_;
 
     double steeringFactor_;
 

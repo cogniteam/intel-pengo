@@ -3,9 +3,10 @@
     <arg name="enabled" default="true" />
     <arg name="camera_name" default="camera_front" />
     <arg name="tracking_target" default="person" />
-    <arg name="max_speed" default="0.4" />
     <arg name="min_speed" default="0.1" />
-    <arg name="steering_factor" default="0.01" />
+    <arg name="max_speed" default="0.4" />
+    <arg name="min_rotation" default="0.1" />
+    <arg name="max_rotation" default="0.4" />
     <arg name="velocity_topic" default="navigation_velocity_smoother/raw_cmd_vel" />
 
     <!--  
@@ -18,7 +19,7 @@
     </node>
 
     <node name="pengo_navigation_node" pkg="hupster_detection"
-          type="person_follower_node">
+          type="person_follower_node" respawn="true">
 
         <param name="target" value="$(arg tracking_target)"/>
         <param name="min_distance" value="1.5" />
@@ -28,7 +29,8 @@
         <param name="tracking_timeout" value="2.0" />
         <param name="max_speed" value="$(arg max_speed)" />
         <param name="min_speed" value="$(arg min_speed)" />
-        <param name="steering_factor" value="$(arg steering_factor)" />
+        <param name="max_rotation" value="$(arg max_rotation)" />
+        <param name="min_rotation" value="$(arg min_rotation)" />
         <param name="enable" value="$(arg enabled)" />
         <param name="base_frame" value="base_link" />
         <remap from="mobile_base/commands/velocity" to="$(arg velocity_topic)" />
