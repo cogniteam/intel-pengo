@@ -3,6 +3,9 @@
     <arg name="enabled" default="true" />
     <arg name="camera_name" default="camera_front" />
     <arg name="tracking_target" default="person" />
+    <arg name="max_speed" default="0.4" />
+    <arg name="min_speed" default="0.1" />
+    <arg name="steering_factor" default="0.01" />
     <arg name="velocity_topic" default="navigation_velocity_smoother/raw_cmd_vel" />
 
     <!--  
@@ -23,9 +26,9 @@
 
         <!-- Seconds -->
         <param name="tracking_timeout" value="2.0" />
-        <param name="max_speed" value="0.8" />
-        <param name="min_speed" value="0.2" />
-        <param name="steering_factor" value="0.04" />
+        <param name="max_speed" value="$(arg max_speed)" />
+        <param name="min_speed" value="$(arg min_speed)" />
+        <param name="steering_factor" value="$(arg steering_factor)" />
         <param name="enable" value="$(arg enabled)" />
         <param name="base_frame" value="base_link" />
         <remap from="mobile_base/commands/velocity" to="$(arg velocity_topic)" />
