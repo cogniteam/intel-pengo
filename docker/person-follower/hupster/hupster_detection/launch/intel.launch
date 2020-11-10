@@ -3,9 +3,9 @@
     <arg name="enabled" default="true" />
     <arg name="camera_name" default="camera_front" />
     <arg name="tracking_target" default="person" />
+    <arg name="tracking_timeout" default="2.0" />
     <arg name="min_speed" default="0.1" />
     <arg name="max_speed" default="0.4" />
-    <arg name="min_rotation" default="0.1" />
     <arg name="max_rotation" default="0.4" />
     <arg name="velocity_topic" default="navigation_velocity_smoother/raw_cmd_vel" />
 
@@ -26,7 +26,7 @@
         <param name="max_distance" value="3.0" />
 
         <!-- Seconds -->
-        <param name="tracking_timeout" value="2.0" />
+        <param name="tracking_timeout" value="$(arg tracking_timeout)" />
         <param name="max_speed" value="$(arg max_speed)" />
         <param name="min_speed" value="$(arg min_speed)" />
         <param name="max_rotation" value="$(arg max_rotation)" />

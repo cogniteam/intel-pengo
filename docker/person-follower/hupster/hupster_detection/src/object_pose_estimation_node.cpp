@@ -81,25 +81,10 @@ private:
     }
 
     void depthCallback(const sensor_msgs::Image::ConstPtr& depthImage) {
-
         depthImage_ = cv_bridge::toCvShare(depthImage)->image;
-
-        // double value = depthMat.at<uint16_t>(
-        //         cv::Point(depthMat.cols / 2, depthMat.rows / 2));
-
-        // ROS_INFO("Depth received %f", value);
-
-        // cv::imshow("view", depthMat);
-        // cv::waitKey(30);
     }
 
     void detectedObjectsCallback(const object_msgs::ObjectsInBoxes::Ptr& objects) {
-
-        static int i = 10;
-
-        if (i-- > 0) 
-            return; 
-
 
         if (!cameraModel_.initialized() || depthImage_.cols == 0 || depthImage_.rows == 0) {
             return;
@@ -113,8 +98,8 @@ private:
             int pointsCount = 0;
             cv::Point3d points3dSum(0, 0, 0);
 
-            int OFFSET_X = object.roi.width * 0.4;
-            int OFFSET_Y = object.roi.height * 0.4;
+            int OFFSET_X = object.roi.width * 0.2;
+            int OFFSET_Y = object.roi.height * 0.2;
 
             for (size_t y = object.roi.y_offset + OFFSET_Y; y < object.roi.y_offset + object.roi.height - OFFSET_Y; y++) {
                 for (size_t x = object.roi.x_offset + OFFSET_X; x < object.roi.x_offset + object.roi.width - OFFSET_X; x++) {
@@ -125,13 +110,19 @@ private:
                     }
 
                     auto point3d = cameraModel_.projectPixelTo3dRay(uv);
-                    auto depth = depthImage_.at<uint16_t>(uv);
 
-                    if (depth < 0.001) {
+                    // Read depth in mm and convert to meters
+                    double depth = (double)depthImage_.at<uint16_t>(uv) / 1000.0;
+
+                    if (!std::isfinite(depth)) {
                         continue;
                     }
 
-                    point3d.z = depth / 1000.0;
+                    // Convert to unit vector
+                    point3d /= cv::norm(point3d);
+
+                    // Scale to actual depth value (in meters)
+                    point3d *= depth;
 
                     points3dSum += point3d;
                     pointsCount++;
@@ -148,7 +139,7 @@ private:
                         object.roi.y_offset + object.roi.height / 2);
                 auto objectRay = cameraModel_.projectPixelTo3dRay(centerPixel);
                 double bearing = atan2(objectRay.z, -objectRay.x);
-                double distance = cv::norm(centerOfMass) - 0.6;
+                double distance = cv::norm(centerOfMass) - 0.1;
 
                 tf::Vector3 objectVector(distance * sin(bearing), 
                         distance * cos(bearing), 0);

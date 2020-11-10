@@ -60,13 +60,12 @@ public:
         ros::NodeHandle node;
         ros::NodeHandle nodePrivate("~");
 
-        nodePrivate.param("tracking_timeout", trackingTimeout_, 2.0);
+        nodePrivate.param("tracking_timeout", trackingTimeout_, 0.5);
         nodePrivate.param("min_distance", minDistance_, 1.5);
         nodePrivate.param("max_distance", maxDistance_, 5.0);
         nodePrivate.param("max_speed", maxSpeed_, 110.0);
         nodePrivate.param("min_speed", minSpeed_, 110.0);
 
-        nodePrivate.param("min_rotation", minRotation_, 0.1);
         nodePrivate.param("max_rotation", maxRotation_, 0.5);
 
         nodePrivate.param("steering_factor", steeringFactor_, 3.0);
@@ -143,6 +142,9 @@ private:
         tf::Vector3 closestPerson(-10000, 0, 0);
         bool personFound = false;
 
+        static int detectionsInARow = 0;
+        static int detectionsInARowNeeded = 3;
+
         for (auto&& object : objects->markers) {
 
             //
@@ -156,13 +158,14 @@ private:
                 try {
                                         
                     poseVector = transformToBaseFrame(object.header.frame_id, 
-                            object.header.stamp, object.pose.position);
+                            ros::Time(0), object.pose.position);
 
                     //
                     // This person is closer to prev detected
                     //
                     if (target_.distance(closestPerson) > target_.distance(poseVector)) {
-                        personFound = true;
+                        // personFound = true;
+                        detectionsInARow++;
                         closestPerson = poseVector;
                     }
 
@@ -179,7 +182,13 @@ private:
         // Person found, continue following
         //
         if (personFound) {
-            updateTarget(closestPerson);
+            
+            if (detectionsInARow >= detectionsInARowNeeded) {
+                updateTarget(closestPerson);
+            }
+
+        } else {
+            detectionsInARow = 0;
         }
 
     }
@@ -295,7 +304,7 @@ private:
             // Person is too close
             //
             ROS_INFO("Prey is too close, wait for it to run away [%f]", 
-                    distanceToTarget);
+                distanceToTarget);
 
             speed = 0.0;
 
@@ -304,7 +313,7 @@ private:
             // Person is too far
             //
             ROS_INFO("Prey is too far, lure it by intensive waiting [%f]", 
-                    distanceToTarget);
+                distanceToTarget);
 
             speed = 0.0;
             
@@ -313,48 +322,37 @@ private:
             // Distance is OK - following
             //
             ROS_INFO("Stalking [Distance = %f, Angle = %i]", distanceToTarget, 
-                    (int)angles::to_degrees(bearing));
+                (int)angles::to_degrees(bearing));
         }
 
-        double bearingClamped;
+        // Used to normilize bearing estimation (bearing is clamped within range [-MAX_BEARING, +MAX_BEARING])
         const double MAX_BEARING = angles::from_degrees(50);
 
-        if (angles::to_degrees(bearing) > 50) {
-            bearing = MAX_BEARING;
+        // Clamp bearing estimation to range [-MAX, +MAX] in rads
+        bearing = fmax(fmin(bearing, MAX_BEARING), -MAX_BEARING);
+
+        // Translate bearing angle (in rads) to angular velocity 
+        // within range [-MAX_ROTATION_VEL, +MAX_ROTATION_VEL]
+        double angularVelocity = (bearing / MAX_BEARING) * maxRotation_;
+
+        // Clamp rotation velocity to [-MAX_ROTATION_VEL, +MAX_ROTATION_VEL]
+        angularVelocity = fmax(fmin(angularVelocity, maxRotation_), -maxRotation_);
+
+        // Check if target in the center of the FOV (within +-5 degrees margin)
+        bool targetInCenter = fabs(angles::to_degrees(bearing)) < 5.0;
+
+        // Don't steer if target in center of FOV
+        if (targetInCenter) {
+            angularVelocity = 0;
         }
 
-        if (angles::to_degrees(bearing) < -50) {
-            bearing = -MAX_BEARING;
+        // Tooo close, stop 
+        if (distanceToTarget < 1.0) {
+            angularVelocity = 0;
+            speed = 0;
         }
 
-        double steeringAngle = 0;
-
-        if (bearing > 0) {
-            steeringAngle = minRotation_ + ((bearing / MAX_BEARING) * (maxRotation_ - minRotation_));
-        } else {
-            steeringAngle = -minRotation_ - ((bearing / MAX_BEARING) * (maxRotation_ - minRotation_));
-        }
-
-        if (steeringAngle > maxRotation_) {
-            steeringAngle = maxRotation_;
-        }
-
-        if (steeringAngle < -maxRotation_) {
-            steeringAngle = -maxRotation_;
-        }
-
-        if (speed == 0) {
-
-            bool targetInCenter = fabs(angles::to_degrees(bearing)) < 5.0;
-
-            // Don't steer
-            if (targetInCenter) {
-                steeringAngle = 0;
-            }
-
-        }
-
-        publishCommand(speed, steeringAngle);
+        publishCommand(speed, angularVelocity);
 
     }
 
@@ -423,8 +421,6 @@ private:
     double minSpeed_;
 
     double maxSpeed_;
-
-    double minRotation_;
 
     double maxRotation_;
 
