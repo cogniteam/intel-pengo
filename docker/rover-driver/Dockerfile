@@ -1,15 +1,7 @@
 FROM ros:melodic
 
-RUN apt-get update && apt install ros-melodic-message-to-tf ros-melodic-tf2-geometry-msgs ros-melodic-robot-localization ros-melodic-twist-mux -y && rm /var/lib/apt/lists/* -rf
+RUN apt-get update && apt install ros-melodic-message-to-tf ros-melodic-rr-openrover-driver ros-melodic-rr-control-input-manager -y && rm /var/lib/apt/lists/* -rf
 
-RUN mkdir -p /rover_ws/src/ && cd /rover_ws/src/ && \
-        git clone https://github.com/RoverRobotics/rr_openrover_stack.git && \
-        cd .. && \
-        . /opt/ros/melodic/setup.sh && catkin_make
+COPY starterkit_bringup.launch /opt/ros/${ROS_DISTRO}/share/rr_openrover_driver/launch/starterkit_bringup.launch
 
-
-WORKDIR /
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x ./entrypoint.sh
-
-ENTRYPOINT [ "/entrypoint.sh" ]
+CMD roslaunch rr_openrover_driver starterkit_bringup.launch

@@ -19,7 +19,7 @@
     </node>
 
     <node name="pengo_navigation_node" pkg="hupster_detection"
-          type="person_follower_node" respawn="true">
+          type="person_follower_node" respawn="true" output="screen">
 
         <param name="target" value="$(arg tracking_target)"/>
         <param name="min_distance" value="1.5" />
@@ -30,7 +30,6 @@
         <param name="max_speed" value="$(arg max_speed)" />
         <param name="min_speed" value="$(arg min_speed)" />
         <param name="max_rotation" value="$(arg max_rotation)" />
-        <param name="min_rotation" value="$(arg min_rotation)" />
         <param name="enable" value="$(arg enabled)" />
         <param name="base_frame" value="base_link" />
         <remap from="mobile_base/commands/velocity" to="$(arg velocity_topic)" />
