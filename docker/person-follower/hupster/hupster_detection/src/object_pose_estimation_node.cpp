@@ -119,7 +119,8 @@ private:
                     }
 
                     // Convert to unit vector
-                    point3d /= cv::norm(point3d);
+                    auto d = fmax(0.2, cv::norm(point3d));
+                    point3d /= d;
 
                     // Scale to actual depth value (in meters)
                     point3d *= depth;

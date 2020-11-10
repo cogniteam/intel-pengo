@@ -164,13 +164,13 @@ private:
                     // This person is closer to prev detected
                     //
                     if (target_.distance(closestPerson) > target_.distance(poseVector)) {
-                        // personFound = true;
+                        personFound = true;
                         detectionsInARow++;
                         closestPerson = poseVector;
                     }
 
                 } catch(const std::exception& e) {
-                    ROS_ERROR("Failed to transform to base frame");
+                    ROS_ERROR("Failed to transform to base frame %s", e.what());
                     continue;
                 }
                                     
