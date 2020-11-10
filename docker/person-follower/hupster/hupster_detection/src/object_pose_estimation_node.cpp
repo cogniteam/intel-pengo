@@ -77,16 +77,51 @@ public:
 private:
 
     void cameraInfoCallback(const sensor_msgs::CameraInfo::Ptr& cameraInfo) {
-        cameraModel_.fromCameraInfo(*cameraInfo);
+        
+        if (!cameraInfo) {
+            return;
+        }
+
+        try {
+            cameraModel_.fromCameraInfo(*cameraInfo);
+        } catch (...) {
+            ROS_ERROR_THROTTLE(1.0, "null camera info received");
+        }
     }
 
     void depthCallback(const sensor_msgs::Image::ConstPtr& depthImage) {
-        depthImage_ = cv_bridge::toCvShare(depthImage)->image;
+        
+        if (!depthImage) {
+            return;
+        }
+
+        try {
+            depthImage_ = cv_bridge::toCvShare(depthImage)->image;
+        } catch (...) {
+            ROS_ERROR_THROTTLE(1.0, "null depth image received");
+        }
     }
 
     void detectedObjectsCallback(const object_msgs::ObjectsInBoxes::Ptr& objects) {
 
-        if (!cameraModel_.initialized() || depthImage_.cols == 0 || depthImage_.rows == 0) {
+        static int c = 10;
+
+        if (c-- >= 0) {
+            return;
+        }
+
+
+        if ((!cameraModel_.initialized()) || depthImage_.cols == 0 || depthImage_.rows == 0) {
+            return;
+        }
+
+        if (!objects) {
+            ROS_WARN_THROTTLE(1.0, "objects is null in detection callback");
+            return; 
+        }
+
+        if (depthImage_.cols > 2000 || depthImage_.rows > 2000) {
+            ROS_WARN_THROTTLE(1.0, "image too big [%i, %i]", depthImage_.cols, depthImage_.rows);
             return;
         }
 
@@ -145,8 +180,8 @@ private:
                 tf::Vector3 objectVector(distance * sin(bearing), 
                         distance * cos(bearing), 0);
 
-                ROS_INFO("%s at [%f, %f, %f]", object.object.object_name.c_str(), 
-                        centerOfMass.x, centerOfMass.y, centerOfMass.z);
+                // ROS_INFO("%s at [%f, %f, %f]", object.object.object_name.c_str(), 
+                //         centerOfMass.x, centerOfMass.y, centerOfMass.z);
 
                 visualization_msgs::Marker marker;
                 marker.lifetime = ros::Duration(0.2);

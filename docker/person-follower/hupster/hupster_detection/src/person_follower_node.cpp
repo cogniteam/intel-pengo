@@ -222,7 +222,7 @@ private:
      * @param target 
      */
     void updateTarget(const tf::Vector3& target) {
-        ROS_INFO("Target updated [%f, %f]", target.x(), target.y());
+        // ROS_INFO_THROTTLE(1.0, "Target updated [%f, %f]", target.x(), target.y());
         lastTargetUpdateTime_ = ros::Time::now();
         target_ = target;
 
@@ -268,9 +268,9 @@ private:
             if (!trackingActive_) {
                 trackingActive_ = true;
                 updateTrackingState("tracking");
-                ROS_INFO("Meatbag detected, attack it!");
+                ROS_WARN("Meatbag detected, attack it!");
             } else {
-                ROS_INFO_THROTTLE(1.0, "Tracking...");
+                ROS_INFO_THROTTLE(0.5, "Tracking...");
             }
         }
 
@@ -303,7 +303,7 @@ private:
             // 
             // Person is too close
             //
-            ROS_INFO("Prey is too close, wait for it to run away [%f]", 
+            ROS_INFO_THROTTLE(0.5, "Prey is too close, wait for it to run away [%f]", 
                 distanceToTarget);
 
             speed = 0.0;
@@ -312,7 +312,7 @@ private:
             //
             // Person is too far
             //
-            ROS_INFO("Prey is too far, lure it by intensive waiting [%f]", 
+            ROS_INFO_THROTTLE(0.5, "Prey is too far, lure it by intensive waiting [%f]", 
                 distanceToTarget);
 
             speed = 0.0;
@@ -321,7 +321,7 @@ private:
             //
             // Distance is OK - following
             //
-            ROS_INFO("Stalking [Distance = %f, Angle = %i]", distanceToTarget, 
+            ROS_INFO_THROTTLE(0.5, "Stalking [Distance = %f, Angle = %i]", distanceToTarget, 
                 (int)angles::to_degrees(bearing));
         }
 
