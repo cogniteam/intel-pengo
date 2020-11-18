@@ -1,0 +1,80 @@
+<!-- 
+
+    Description:
+        Hector mapping and localization
+
+    Required packages:
+        - hector_mapping (ros-hydro-hector-mapping)
+
+    Included launch files:
+        - None
+
+    Arguments:
+        - map_frame (string): The name of the map frame
+        - base_frame (string): The name of the base frame of the robot. This is the frame used for 
+          localization and for transformation of laser scan data.
+        - use_tf_scan_transformation (boolean): Whether to transform the scan with the tf attached to the scan message
+        - map_resolution (double): The map resolution [m]. This is the length of a grid cell edge
+        - map_size (int): The size [number of cells per axis] of the map. The map is square and has (map_size * map_size) grid cells
+        - map_start_x (double): Location of the origin [0.0, 1.0] of the /map frame on the x axis relative to the grid map. 0.5 is in the middle
+        - map_start_y (double): Location of the origin [0.0, 1.0] of the /map frame on the y axis relative to the grid map. 0.5 is in the middle
+        - map_multi_res_levels (int): The number of map multi-resolution grid levels
+        - scan_topic (string): Input scan topic name
+        - output (string): Prints output, the value can be "screen" or "log"
+        - respawn (boolean): Restart the node automatically if it quits
+
+    Notes:
+        - This launch file will work with default values with scan messages, having "laser" frame_id
+        - When doubling the resolution, alse increase the map_multi_res_levels by 1 (and vice versa)
+          For example:
+            Resolution - 0.0125 ==> Multi res levels - 4
+            Resolution - 0.025 ==> Multi res levels - 3
+            Resolution - 0.05 ==> Multi res levels - 2
+    
+-->
+
+<launch>
+
+    <arg name="map_frame" default="map" />
+    <arg name="base_frame" default="cam1_link" />
+    <arg name="use_tf_scan_transformation" default="true" />
+    <arg name="map_resolution" default="0.025" />
+    <arg name="tf_map_scanmatch_transform_frame_name" default="cam1_link" />
+    <arg name="map_size" default="2048" />
+    <arg name="map_start_x" default="0.5" />
+    <arg name="map_start_y" default="0.5" />
+    <arg name="map_multi_res_levels" default="3" />
+    <arg name="scan_subscriber_queue_size" default="5" />
+    <arg name="max_rotation" default="1000" />
+    <arg name="max_translation" default="99999" />
+    <arg name="scan_topic" default="/scan" /> 
+    <arg name="respawn" default="false" />
+    <arg name="output" default="screen" />
+
+    <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="$(arg output)" respawn="$(arg respawn)">
+        <param name="map_frame" value="$(arg map_frame)" />
+        <param name="base_frame" value="$(arg base_frame)" />
+        <param name="use_tf_scan_transformation" value="$(arg use_tf_scan_transformation)"/>
+        <param name="use_tf_pose_start_estimate" value="false"/>
+        <param name="pub_map_odom_transform" value="false"/>
+        <param name="map_resolution" value="$(arg map_resolution)"/>
+        <param name="map_size" value="$(arg map_size)"/>
+        <param name="map_start_x" value="$(arg map_start_x)"/>
+        <param name="map_start_y" value="$(arg map_start_y)" />
+        <param name="map_multi_res_levels" value="$(arg map_multi_res_levels)" />
+        <param name="max_rotation" value="$(arg max_rotation)" />
+        <param name="max_translation" value="$(arg max_translation)" />
+        <param name="update_factor_free" value="0.4"/>
+        <param name="update_factor_occupied" value="0.9" />    
+        <param name="map_update_distance_thresh" value="0.4"/>
+        <param name="map_update_angle_thresh" value="0.06" />
+        <param name="laser_z_min_value" value="-2.5" />
+        <param name="laser_z_max_value" value="2.5" />
+        <param name="advertise_map_service" value="false"/>
+        <param name="scan_subscriber_queue_size" value="$(arg scan_subscriber_queue_size)"/>
+        <param name="scan_topic" value="$(arg scan_topic)"/>
+        <param name="tf_map_scanmatch_transform_frame_name" value="$(arg tf_map_scanmatch_transform_frame_name)" />
+    </node>
+
+</launch>
+

@@ -1,6 +1,6 @@
 FROM ros:melodic
 
-RUN apt-get update && apt install ros-melodic-depthimage-to-laserscan -y && rm /var/lib/apt/lists/* -rf
+RUN apt-get update && apt install ros-melodic-tf2* ros-melodic-depthimage-to-laserscan -y && rm /var/lib/apt/lists/* -rf
 
 WORKDIR /
 
