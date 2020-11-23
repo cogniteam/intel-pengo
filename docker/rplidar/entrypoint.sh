@@ -11,8 +11,11 @@ Z=${3:-0}
 YAW=${4:-0}
 PITCH=${5:-0}
 ROLL=${6:-0}
-PORT=${7:-/dev/ttyUSB0}
+SERIAL_PORT=${7:-/dev/ttyUSB0}
+FRAME_ID=${8:-laser}
 
-rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link laser &
+# adding transform publisher from the base_link to the choosen frame for the lidar
+rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link ${FRAME_ID} &
 
-exec roslaunch rplidar_ros rplidar.launch serial_port:=${PORT}
+#executing the custom rplidar launch modified to receive arguments
+exec roslaunch rplidar.launch serial_port:=${SERIAL_PORT} frame_id=${FRAME_ID}
