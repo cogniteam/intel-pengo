@@ -11,8 +11,8 @@ Z=${3:-0}
 YAW=${4:-0}
 PITCH=${5:-0}
 ROLL=${6:-0}
-LIDAR_PORT=${7:-/dev/ttyUSB0}
+PORT=${7:-/dev/ttyUSB0}
 
 rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link laser &
 
-exec roslaunch rplidar_ros rplidar.launch serial_port:=${LIDAR_PORT}
+exec roslaunch rplidar_ros rplidar.launch serial_port:=${PORT}
