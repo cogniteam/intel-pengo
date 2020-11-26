@@ -13,6 +13,6 @@ RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-CMD roslaunch kobuki_launch kobuki.launch serialport:=/dev/ttyUSB0 base:=kobuki
-
+CMD roslaunch kobuki_launch kobuki.launch serialport:=/dev/ttyUSB0 base:=kobuki kobuki_publish_tf:=true
+ 
 
