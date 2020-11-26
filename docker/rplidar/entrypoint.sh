@@ -18,4 +18,4 @@ FRAME_ID=${8:-laser}
 rosrun tf2_ros static_transform_publisher ${X} ${Y} ${Z} ${YAW} ${PITCH} ${ROLL} base_link ${FRAME_ID} &
 
 #executing the custom rplidar launch modified to receive arguments
-exec roslaunch rplidar.launch serial_port:=${SERIAL_PORT} frame_id=${FRAME_ID}
+exec roslaunch rplidar.launch serial_port:=${SERIAL_PORT} frame_id:=${FRAME_ID}
