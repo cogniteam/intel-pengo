@@ -75,6 +75,8 @@ PengoStalkerRos::PengoStalkerRos() {
     clearCostmapsService_ = node.serviceClient<std_srvs::Empty>(
             "move_base/clear_costmaps", false);
 
+    clearCostmapsService_.waitForExistence();
+
     ROS_INFO("Stalker initialized!");
 
     setPersonFollowerEnabled(false);
