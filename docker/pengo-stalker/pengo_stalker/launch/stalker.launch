@@ -7,6 +7,9 @@
         
         <param name="patrol_points" value="5" />
         <param name="patrol_radius" value="0.5" />
+
+        <!-- Auto start -->
+        <param name="enabled" value="false" />
     </node>
 
 </launch>

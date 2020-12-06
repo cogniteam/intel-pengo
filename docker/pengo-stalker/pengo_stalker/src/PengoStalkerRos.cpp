@@ -36,14 +36,17 @@ PengoStalkerRos::PengoStalkerRos() {
     ros::NodeHandle node;
     ros::NodeHandle nodePrivate("~");
 
+    bool enabled;
+
     nodePrivate.param("patrol_points", patrolPoints_, 5);
     nodePrivate.param("patrol_radius", patrolRadius_, 0.5);
+    nodePrivate.param("enabled", enabled, false);
 
     moveBaseActionClient_.reset(
             new actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>(
                     "move_base", true));
 
-    odomSubscriber_ = node.subscribe("odom", 10, 
+    odomSubscriber_ = node.subscribe("mobile_base/odom", 10, 
             &PengoStalkerRos::odometryCallback, this);
 
     // TODO Visual odometry disabled, using wheel odometry for person following only
@@ -73,6 +76,12 @@ PengoStalkerRos::PengoStalkerRos() {
             "move_base/clear_costmaps", false);
 
     ROS_INFO("Stalker initialized!");
+
+    setPersonFollowerEnabled(false);
+
+    if (enabled) {
+        startPatrol();
+    }
 }
 
 /**
