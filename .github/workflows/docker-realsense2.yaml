@@ -52,6 +52,15 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: cogniteam/realsense2-t265
+
+        name: Build and push realsense2-d435i-nvidia
+        uses: docker/build-push-action@v2
+        with:
+          context: docker/realsense2-d435i-nvidia-nx/
+          file: docker/realsense2-d435i-nvidia-nx/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: cogniteam/realsense2-d435i-nvidia
       -
         name: Build and push depth-to-scan
         uses: docker/build-push-action@v2
